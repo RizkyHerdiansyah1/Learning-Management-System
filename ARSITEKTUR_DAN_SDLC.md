@@ -3,7 +3,124 @@
 
 ---
 
-## 📐 BAGIAN 1: ARSITEKTUR SISTEM
+## � USE CASE DIAGRAM
+
+### Actors & Use Cases
+
+```mermaid
+graph LR
+    subgraph System["Journey Learn LMS"]
+        subgraph DosenUC["👨‍🏫 Dosen Use Cases"]
+            UC1["Login/Logout"]
+            UC2["Lihat Dashboard"]
+            UC3["Buat Kelas"]
+            UC4["Edit Kelas"]
+            UC5["Hapus Kelas"]
+            UC6["Upload Materi Video"]
+            UC7["Upload Materi Text"]
+            UC8["Buat Quiz"]
+            UC9["Tambah Soal Quiz"]
+            UC10["Lihat Nilai Mahasiswa"]
+            UC11["Kelola Materi"]
+        end
+        
+        subgraph MahasiswaUC["👨‍🎓 Mahasiswa Use Cases"]
+            UC12["Login/Logout"]
+            UC13["Lihat Dashboard"]
+            UC14["Browse Kelas"]
+            UC15["Enroll Kelas"]
+            UC16["Lihat Materi"]
+            UC17["Menonton Video"]
+            UC18["Membaca Text"]
+            UC19["Mengerjakan Quiz"]
+            UC20["Lihat Nilai"]
+            UC21["Track Progress"]
+        end
+    end
+    
+    Dosen["👨‍🏫 Dosen"]
+    Mahasiswa["👨‍🎓 Mahasiswa"]
+    
+    Dosen --> UC1
+    Dosen --> UC2
+    Dosen --> UC3
+    Dosen --> UC4
+    Dosen --> UC5
+    Dosen --> UC6
+    Dosen --> UC7
+    Dosen --> UC8
+    Dosen --> UC9
+    Dosen --> UC10
+    Dosen --> UC11
+    
+    Mahasiswa --> UC12
+    Mahasiswa --> UC13
+    Mahasiswa --> UC14
+    Mahasiswa --> UC15
+    Mahasiswa --> UC16
+    Mahasiswa --> UC17
+    Mahasiswa --> UC18
+    Mahasiswa --> UC19
+    Mahasiswa --> UC20
+    Mahasiswa --> UC21
+    
+    style Dosen fill:#667eea,color:#fff
+    style Mahasiswa fill:#38ef7d,color:#fff
+    style System fill:#f5f7fa
+```
+
+### Use Case Details
+
+#### **👨‍🏫 Dosen (Lecturer)**
+
+| ID | Use Case | Deskripsi | Precondition |
+|----|----------|-----------|--------------|
+| UC-D01 | Login/Logout | Masuk dan keluar sistem | Memiliki akun dosen |
+| UC-D02 | Lihat Dashboard | Melihat statistik kelas & mahasiswa | User terautentikasi |
+| UC-D03 | Buat Kelas | Membuat kelas pembelajaran baru | User adalah dosen |
+| UC-D04 | Edit Kelas | Mengubah data kelas | Dosen owner kelas |
+| UC-D05 | Hapus Kelas | Menghapus kelas | Dosen owner kelas |
+| UC-D06 | Upload Materi Video | Menambah materi YouTube | Kelas sudah dibuat |
+| UC-D07 | Upload Materi Text | Menambah materi teks | Kelas sudah dibuat |
+| UC-D08 | Buat Quiz | Membuat materi quiz | Kelas sudah dibuat |
+| UC-D09 | Tambah Soal Quiz | Menambahkan soal pilihan ganda | Quiz sudah dibuat |
+| UC-D10 | Lihat Nilai Mahasiswa | Melihat hasil quiz mahasiswa | Ada mahasiswa yang mengerjakan |
+| UC-D11 | Kelola Materi | Mengatur urutan & menghapus materi | Materi sudah ada |
+
+#### **👨‍🎓 Mahasiswa (Student)**
+
+| ID | Use Case | Deskripsi | Precondition |
+|----|----------|-----------|--------------|
+| UC-M01 | Login/Logout | Masuk dan keluar sistem | Memiliki akun mahasiswa |
+| UC-M02 | Lihat Dashboard | Melihat kelas yang diikuti | User terautentikasi |
+| UC-M03 | Browse Kelas | Melihat semua kelas tersedia | User terautentikasi |
+| UC-M04 | Enroll Kelas | Mendaftar ke kelas | Belum terdaftar di kelas |
+| UC-M05 | Lihat Materi | Mengakses materi pembelajaran | Sudah enroll kelas |
+| UC-M06 | Menonton Video | Menonton video YouTube embedded | Materi tipe video, materi unlocked |
+| UC-M07 | Membaca Text | Membaca konten teks | Materi tipe text, materi unlocked |
+| UC-M08 | Mengerjakan Quiz | Menjawab soal quiz | Materi tipe quiz, materi unlocked |
+| UC-M09 | Lihat Nilai | Melihat hasil quiz | Sudah mengerjakan quiz |
+| UC-M10 | Track Progress | Melihat progress pembelajaran | Sudah mulai belajar |
+
+### Business Rules
+
+**Sequential Learning:**
+- Mahasiswa harus menyelesaikan materi 1 sebelum bisa akses materi 2
+- Progress tracked otomatis saat mahasiswa complete materi
+
+**Quiz Limitations:**
+- Maksimal 3 kali percobaan per quiz
+- Nilai minimal 70 untuk unlock materi berikutnya
+- Auto-grading dengan sistem pilihan ganda
+
+**Access Control:**
+- Hanya dosen owner yang bisa edit/delete kelas
+- Mahasiswa hanya bisa akses kelas yang sudah di-enroll
+- Role-based middleware di setiap route
+
+---
+
+## �📐 BAGIAN 1: ARSITEKTUR SISTEM
 
 ### 1.1 Arsitektur Layer Sistem
 
