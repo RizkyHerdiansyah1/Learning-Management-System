@@ -429,6 +429,139 @@ public void test_logout_hapus_semua_data() {
 | 2 | Gagal submit quiz (silent crash) | `findViewById(checkedId)` mencari RadioButton dari Activity root, bukan dari RadioGroup → NullPointerException | Ganti ke `rg.findViewById(checkedId)` |
 | 3 | Field `selesai` selalu `false` | `KelasController` menggunakan kolom `selesai` yang tidak ada, seharusnya `status === 'completed'` | Perbaiki kondisi cek progress ke `$progress->status === 'completed'` |
 
+## 4.6 Rencana Penerapan Pipeline CI/CD
+
+*Continuous Integration / Continuous Deployment* (CI/CD) adalah praktik otomasi dalam pengembangan perangkat lunak yang memungkinkan proses build, test, dan deploy berjalan secara otomatis setiap kali ada perubahan kode yang di-push ke repository.
+
+Karena proyek ini menggunakan **GitHub** sebagai platform version control, rencana CI/CD menggunakan **GitHub Actions** sebagai alat otomasi pipeline.
+
+### 4.6.1 Tujuan Penerapan CI/CD
+
+| Tujuan | Penjelasan |
+|--------|------------|
+| **Otomasi Testing** | Setiap push ke branch `master` akan otomatis menjalankan 74 test cases (PHPUnit + JUnit) |
+| **Deteksi Bug Dini** | Pipeline akan gagal dan memberi notifikasi jika ada test yang tidak lulus |
+| **Otomasi Build APK** | Setiap rilis baru akan otomatis build file `app-debug.apk` tanpa intervensi manual |
+| **Deployment Otomatis** | Jika semua test lulus, kode otomatis di-deploy ke server staging/produksi |
+
+### 4.6.2 Tahapan Pipeline
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   TRIGGER   │ →  │    BUILD    │ →  │    TEST     │ →  │   DEPLOY    │
+│  git push   │    │ composer    │    │  PHPUnit    │    │ php artisan │
+│  ke master  │    │ gradle      │    │  JUnit      │    │ serve/VPS   │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+```
+
+| Stage | Alat | Proses |
+|-------|------|--------|
+| **Build** | Composer, Gradle | Install dependencies, compile assets |
+| **Test** | PHPUnit, JUnit 4 | Jalankan 42 + 32 = 74 test cases |
+| **Package** | Gradle assembleDebug | Build file APK Android |
+| **Deploy** | SSH / Artisan | Migrasikan DB + restart server |
+
+### 4.6.3 Rencana Konfigurasi GitHub Actions
+
+Berikut adalah rancangan file konfigurasi pipeline `.github/workflows/ci.yml` yang akan dibuat:
+
+```yaml
+name: Journey Learn LMS — CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # ─── Stage 1: Laravel Backend Test ───────────────────
+  laravel-test:
+    name: Laravel PHPUnit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_sqlite
+
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist
+        working-directory: ./LMS-Laravel
+
+      - name: Copy .env.testing
+        run: cp .env.example .env.testing
+        working-directory: ./LMS-Laravel
+
+      - name: Generate App Key
+        run: php artisan key:generate --env=testing
+        working-directory: ./LMS-Laravel
+
+      - name: Run PHPUnit Tests (42 TC)
+        run: php artisan test --filter=Api
+        working-directory: ./LMS-Laravel
+
+  # ─── Stage 2: Android Unit Test ──────────────────────
+  android-test:
+    name: Android JUnit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run Android Unit Tests (32 TC)
+        run: ./gradlew testDebugUnitTest
+        working-directory: ./JourneyLearnLMS-Android
+
+  # ─── Stage 3: Build APK ──────────────────────────────
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: [ laravel-test, android-test ]  # Hanya build jika test lulus
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+        working-directory: ./JourneyLearnLMS-Android
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: journey-learn-lms-debug
+          path: JourneyLearnLMS-Android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### 4.6.4 Alur Otomasi yang Diharapkan
+
+```mermaid
+flowchart LR
+    A["Developer\npush ke GitHub"] --> B["GitHub Actions\nTrigger"]
+    B --> C["Stage 1\nLaravel PHPUnit\n42 Test Cases"]
+    B --> D["Stage 2\nAndroid JUnit\n32 Test Cases"]
+    C --> E{Semua\ntest lulus?}
+    D --> E
+    E -->|Ya| F["Stage 3\nBuild APK"]
+    E -->|Tidak| G["❌ Pipeline Gagal\nNotifikasi ke Developer"]
+    F --> H["✅ APK tersedia\ndi GitHub Artifacts"]
+```
+
+> **Status saat ini:** Pipeline CI/CD **belum diterapkan** (masih dalam tahap rencana). Build dan test saat ini dijalankan secara manual menggunakan perintah Gradle dan PHPUnit di lingkungan lokal. Implementasi GitHub Actions menjadi salah satu item pengembangan lanjutan yang direkomendasikan.
+
 ---
 
 # BAB V — PENUTUP
