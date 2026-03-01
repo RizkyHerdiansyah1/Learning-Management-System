@@ -564,9 +564,72 @@ flowchart LR
 
 ---
 
-# BAB V — PENUTUP
+# BAB V — RENCANA EVALUASI DAN KELUARAN PROYEK
 
-## 5.1 Kesimpulan
+## 5.1 Keluaran / Deliverables
+
+Berikut adalah keluaran (*deliverables*) yang dihasilkan dari proyek **Journey Learn LMS**:
+
+| No | Deliverable | Deskripsi | Status |
+|----|-------------|-----------|--------|
+| 1 | **Aplikasi Web Fungsional** | Sistem LMS berbasis Laravel 11 dengan fitur manajemen kelas, materi (video/text/quiz), enrollment, dan progress mahasiswa yang dapat diakses via browser | ✅ Selesai |
+| 2 | **Aplikasi Mobile Android** | APK Android Native (Java) berukuran 6.4 MB yang mendukung login, browse kelas, akses materi, dan submit kuis | ✅ Selesai |
+| 3 | **RESTful API** | 12 endpoint API dengan autentikasi Bearer Token (Laravel Sanctum) sebagai jembatan antara backend dan aplikasi mobile | ✅ Selesai |
+| 4 | **Dokumentasi Teknis** | File `README.md`, `ANDROID_DAN_API.md`, `ARSITEKTUR_DAN_SDLC.md` yang mencakup arsitektur, endpoint API, dan panduan penggunaan | ✅ Selesai |
+| 5 | **Laporan Proyek** | Laporan lengkap mengikuti format template yang mencakup latar belakang, landasan teori, metodologi, implementasi, dan pengujian | ✅ Selesai |
+| 6 | **Hasil Pengujian** | Laporan white-box testing dengan total **74 test cases** (42 PHPUnit + 32 JUnit) — semua PASSED | ✅ Selesai |
+| 7 | **Rencana CI/CD** | Rancangan pipeline GitHub Actions untuk otomasi build, test, dan deploy (dokumentasi `.github/workflows/ci.yml`) | 📋 Rencana |
+
+## 5.2 Indikator Keberhasilan
+
+Keberhasilan proyek diukur berdasarkan indikator-indikator berikut:
+
+### Fungsionalitas Sesuai Spesifikasi
+
+| Indikator | Target | Hasil | Status |
+|-----------|--------|-------|--------|
+| Login & autentikasi berhasil | Token Sanctum diterima | ✅ Berfungsi di web & Android | ✅ Tercapai |
+| Sequential learning berjalan | Materi N+1 terkunci jika N belum selesai | ✅ Dikonfirmasi via test case | ✅ Tercapai |
+| Quiz auto-grading | Nilai dihitung otomatis, lulus jika ≥ 70 | ✅ Berfungsi dengan batas 3x percobaan | ✅ Tercapai |
+| Progress tracking | Status per materi tersimpan di database | ✅ Tabel `progress` berfungsi | ✅ Tercapai |
+| Role-based access | Dosen ≠ Mahasiswa dalam hak akses | ✅ Middleware role berjalan | ✅ Tercapai |
+
+### Integrasi Backend dan Frontend / Mobile Berjalan Lancar
+
+| Indikator | Target | Hasil | Status |
+|-----------|--------|-------|--------|
+| Web ↔ Database | Laravel Eloquent → MySQL | ✅ 7 tabel terhubung | ✅ Tercapai |
+| Android ↔ API | Retrofit + OkHttp → Laravel API | ✅ 12 endpoint terpanggil dengan benar | ✅ Tercapai |
+| Token propagasi | Bearer token dikirim di setiap request | ✅ OkHttp Interceptor berfungsi | ✅ Tercapai |
+| YouTube di WebView | Video diputar tanpa Error 153 | ✅ Setelah fix `loadDataWithBaseURL` | ✅ Tercapai |
+| Quiz submit Android | Jawaban JSON dikirim & dinilai server | ✅ Setelah fix `rg.findViewById` | ✅ Tercapai |
+
+### Penerapan Standar Keamanan Berhasil
+
+| Indikator | Target | Hasil | Status |
+|-----------|--------|-------|--------|
+| Autentikasi API | Semua endpoint protected memerlukan token valid | ✅ Sanctum middleware aktif | ✅ Tercapai |
+| CSRF Protection | Semua form web terlindungi CSRF | ✅ Laravel CSRF token built-in | ✅ Tercapai |
+| SQL Injection Prevention | Query menggunakan Eloquent ORM (parameter binding) | ✅ Tidak ada raw query tanpa binding | ✅ Tercapai |
+| XSS Prevention | Output di Blade template di-escape otomatis | ✅ `{{ }}` Blade escaping aktif | ✅ Tercapai |
+| Role Authorization | Dosen tidak bisa enroll; mahasiswa tidak bisa buat kelas | ✅ Dikonfirmasi via test + middleware | ✅ Tercapai |
+| Token Expiry | Token lama dihapus saat login baru | ✅ `$user->tokens()->delete()` sebelum buat token baru | ✅ Tercapai |
+
+### Rekap Keberhasilan Keseluruhan
+
+```
+Deliverables:          7 / 7   (6 selesai, 1 rencana)
+Fungsionalitas:        5 / 5   ✅ Semua tercapai
+Integrasi:             5 / 5   ✅ Semua berjalan
+Keamanan:              6 / 6   ✅ Semua diterapkan
+White-box Testing:    74 / 74  ✅ 100% PASSED
+```
+
+---
+
+# BAB VI — PENUTUP
+
+## 6.1 Kesimpulan
 
 Berdasarkan hasil pengembangan dan pengujian yang telah dilakukan, dapat disimpulkan:
 
@@ -580,7 +643,7 @@ Berdasarkan hasil pengembangan dan pengujian yang telah dilakukan, dapat disimpu
 
 5. **Tiga bug kritis berhasil teridentifikasi dan diperbaiki** selama proses pengujian, yaitu: YouTube Error 153, NullPointerException pada submit quiz, dan kesalahan pengecekan status progress.
 
-## 5.2 Saran dan Pengembangan Lanjutan
+## 6.2 Saran dan Pengembangan Lanjutan
 
 Untuk pengembangan lebih lanjut, disarankan:
 
