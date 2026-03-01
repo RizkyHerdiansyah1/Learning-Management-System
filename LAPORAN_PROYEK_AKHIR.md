@@ -1,741 +1,742 @@
-# LAPORAN PROYEK AKHIR
-## Pengembangan Learning Management System Terpadu Berbasis Laravel 11 dan Android Native
-
----
-
-**Disusun Oleh:**
-
-| Nama Mahasiswa | NIM |
-| :--- | :--- |
-| Rizky Herdiansyah | [NIM Anda] |
-
-**Program Studi:** Rekayasa Keamanan Siber  
-**Institusi:** Politeknik Siber dan Sandi Negara  
-**Tahun Akademik:** 2025/2026
-
----
-
-# BAB I — PENDAHULUAN
-
-## 1.1 Latar Belakang Masalah
-
-Perkembangan teknologi informasi yang pesat mendorong transformasi besar dalam dunia pendidikan, dari metode konvensional tatap muka menuju sistem pembelajaran digital yang fleksibel dan terukur. Khususnya di lingkungan perguruan tinggi, kebutuhan akan platform manajemen pembelajaran (*Learning Management System* / LMS) yang terintegrasi semakin tinggi untuk mendukung proses belajar-mengajar yang efisien, terstruktur, dan dapat dipantau secara real-time.
-
-Namun, banyak institusi pendidikan di Indonesia masih menghadapi sejumlah tantangan dalam mengimplementasikan LMS, di antaranya:
-
-1. **Ketergantungan pada platform berbayar** seperti Moodle, Google Classroom, atau Edmodo yang memerlukan biaya berlangganan dan keterbatasan kustomisasi.
-2. **Absennya integrasi multi-platform** — mayoritas LMS yang ada hanya mendukung akses via web browser, tanpa aplikasi mobile native yang responsif.
-3. **Keterbatasan fitur pembelajaran terstruktur**, seperti *sequential learning* (materi terbuka secara berurutan) dan pembatasan percobaan kuis yang mendorong mahasiswa belajar lebih disiplin.
-
-Dari permasalahan tersebut, dikembangkanlah **Journey Learn LMS** — sebuah platform pembelajaran online *open-source* berbasis **Laravel 11** (backend/web) dan **Android Native (Java)** (mobile). Sistem ini dirancang untuk:
-
-- Menyediakan manajemen kelas, materi, dan kuis dalam satu ekosistem terintegrasi
-- Mendukung tiga tipe konten: **Video** (YouTube embed), **Text**, dan **Quiz** pilihan ganda dengan *auto-grading*
-- Menerapkan *sequential learning* yang memastikan mahasiswa memahami materi secara bertahap
-- Memberikan akses melalui **web browser** (untuk dosen dan mahasiswa) serta **aplikasi Android** (untuk mahasiswa)
-
-## 1.2 Rumusan Masalah
-
-Berdasarkan latar belakang di atas, rumusan masalah dalam proyek ini adalah sebagai berikut:
-
-1. Bagaimana merancang dan mengimplementasikan arsitektur sistem terpadu berbasis *Client-Server* dengan teknologi **Laravel 11**, **MySQL**, dan **Android Native (Java)** yang mampu mendukung proses pembelajaran online?
-2. Bagaimana membangun **RESTful API** yang aman menggunakan Laravel Sanctum sebagai jembatan komunikasi antara backend web dan aplikasi mobile Android?
-3. Bagaimana mengimplementasikan fitur **sequential learning** dan **sistem kuis otomatis** (auto-grading, batas percobaan, nilai minimum) agar proses pembelajaran lebih terstruktur?
-4. Bagaimana hasil **pengujian white-box** terhadap komponen kritis sistem, baik pada sisi backend (Laravel) maupun frontend mobile (Android)?
-
-## 1.3 Tujuan Proyek
-
-Tujuan yang ingin dicapai melalui proyek ini adalah:
-
-1. Merancang dan mengimplementasikan arsitektur sistem LMS terpadu berbasis *Client-Server* menggunakan **Laravel 11**, **MySQL 8.0**, dan **Android Native (Java)**.
-2. Mengembangkan **aplikasi web** yang memiliki fungsionalitas manajemen kelas dan materi untuk dosen, serta akses belajar bertahap untuk mahasiswa.
-3. Mengembangkan **aplikasi Android** yang memungkinkan mahasiswa mengakses kelas, mempelajari materi (video/text/quiz), dan memantau progres belajar dari perangkat mobile.
-4. Membangun **RESTful API** (12 endpoint) yang stabil dan aman menggunakan autentikasi token Sanctum.
-5. Mendokumentasikan dan menjalankan **pengujian white-box** sebanyak **74 test cases** guna memvalidasi kebenaran logika aplikasi.
-
-## 1.4 Batasan Proyek
-
-Untuk menjaga fokus dan kelayakan dalam kerangka waktu pengerjaan, batasan proyek ini meliputi:
-
-1. **Fungsionalitas:** Sistem hanya mencakup fitur manajemen kelas, materi (video/text/quiz), enrollment, progress tracking, dan kuis pilihan ganda. Fitur chat, notifikasi push, dan sertifikat belum termasuk.
-2. **Platform Mobile:** Aplikasi Android dikembangkan untuk platform **Android** (min SDK 24 / Android 7.0) dan belum mencakup platform iOS.
-3. **Deployment:** Sistem dijalankan pada environment **localhost** menggunakan XAMPP (Apache + MySQL) dan belum di-deploy ke server publik.
-4. **Autentikasi Mobile:** Fitur registrasi akun pada aplikasi Android belum tersedia; akun dibuat melalui web atau API langsung.
-5. **Tipe Materi Video:** Hanya mendukung video dari platform **YouTube** (via embed iframe di WebView).
-
-## 1.5 Manfaat Proyek
-
-| Pihak | Manfaat |
-|-------|---------|
-| **Mahasiswa** | Akses materi kapan saja via web atau HP, pembelajaran terstruktur, progress terukur |
-| **Dosen** | Kemudahan kelola kelas, materi, dan memantau perkembangan mahasiswa |
-| **Institusi** | Alternatif LMS mandiri tanpa biaya berlangganan, mudah dikustomisasi |
-| **Pengembang** | Referensi implementasi REST API + Android Native dengan Laravel Sanctum |
-
----
-
-# BAB II — LANDASAN TEORI
-
-## 2.1 Learning Management System (LMS)
-
-Learning Management System (LMS) adalah perangkat lunak berbasis web yang digunakan untuk merencanakan, mengimplementasikan, dan menilai proses pembelajaran. Fitur umum LMS mencakup manajemen kursus, distribusi konten, penilaian, dan pelacakan kemajuan peserta didik (Ellis, 2009).
-
-## 2.2 Laravel 11
-
-Laravel adalah framework PHP open-source yang mengikuti pola arsitektur **Model-View-Controller (MVC)**. Laravel 11 (rilisan 2024) menghadirkan fitur-fitur modern seperti:
-- **Eloquent ORM** — menyederhanakan interaksi dengan database relasional
-- **Laravel Sanctum** — sistem autentikasi token ringan untuk SPA dan mobile app
-- **Laravel Breeze** — starter kit autentikasi minimalis untuk web
-- **Artisan CLI** — alat baris perintah untuk otomasi tugas development
-
-## 2.3 RESTful API
-
-*Representational State Transfer* (REST) adalah gaya arsitektur untuk membangun layanan web yang menggunakan protokol HTTP. API RESTful menggunakan metode HTTP standar (GET, POST, PUT, DELETE) dan merepresentasikan sumber daya dalam format JSON. Dalam proyek ini, API digunakan sebagai jembatan komunikasi antara backend Laravel dan aplikasi Android.
-
-## 2.4 Laravel Sanctum
-
-Laravel Sanctum menyediakan sistem autentikasi berbasis token untuk aplikasi mobile dan SPA (Single Page Application). Setiap pengguna yang login mendapatkan **Personal Access Token** yang disimpan di tabel `personal_access_tokens` dan dikirimkan pada setiap request API melalui header `Authorization: Bearer <token>`.
-
-## 2.5 Android Native (Java)
-
-Android Native menggunakan bahasa **Java** (atau Kotlin) untuk membangun aplikasi mobile yang langsung berjalan di atas sistem operasi Android. Keunggulannya dibanding framework cross-platform adalah performa yang lebih optimal dan akses penuh ke fitur perangkat keras Android.
-
-## 2.6 Retrofit 2
-
-Retrofit adalah library HTTP client untuk Android yang dikembangkan oleh Square. Library ini menyederhanakan proses pemanggilan REST API dengan anotasi seperti `@GET`, `@POST`, dan `@Body`, serta mendukung konversi JSON otomatis menggunakan **Gson**.
-
-## 2.7 Sequential Learning
-
-Sequential Learning atau pembelajaran bertahap adalah pendekatan pedagogis di mana peserta didik harus menyelesaikan satu unit materi sebelum dapat mengakses materi berikutnya. Pendekatan ini mendorong pemahaman yang mendalam dan mengurangi *skipping* materi penting.
-
-## 2.8 White-box Testing
-
-White-box testing (atau glass-box testing) adalah teknik pengujian perangkat lunak yang menguji struktur internal, alur logika, dan implementasi kode program. Penguji perlu mengetahui kode sumber untuk merancang test case yang mencakup semua jalur eksekusi, kondisi batas, dan skenario kesalahan.
-
----
-
-# BAB III — METODOLOGI DAN DESAIN SISTEM
-
-## 3.1 Model Pengembangan — Waterfall + Iterasi
-
-Proyek ini dikembangkan menggunakan model **Waterfall dengan elemen Iteratif** yang terdiri dari 7 fase:
-
-```
-Planning → Analysis → Design → Development → Testing → Deployment → Maintenance
-    ↑___________________________Iterasi (jika ditemukan bug)___________________|
-```
-
-| Fase | Durasi | Aktivitas | Output |
-|------|--------|-----------|--------|
-| Planning | 4 minggu | Analisis kebutuhan, user story, scope | Dokumen requirements |
-| Analysis | 2 minggu | Audit keamanan, identifikasi risiko | Daftar issues |
-| Design | 2 minggu | ERD, arsitektur MVC, wireframe UI | Desain sistem |
-| Development | 8 minggu | Coding 3700+ LOC (web + Android) | Source code |
-| Testing | 2 minggu | 74 whitebox test cases | Laporan pengujian |
-| Deployment | 1 minggu | XAMPP local + build APK | Web live + APK |
-| Maintenance | Ongoing | Bug fixes | Updated codebase |
-
-## 3.2 Arsitektur Sistem
-
-Sistem menggunakan arsitektur **Client-Server 3-Layer**:
-
-```
-┌──────────────────────────────────────────┐
-│           CLIENT LAYER                   │
-│   Web Browser          Android App       │
-└──────────────┬─────────────┬────────────┘
-               │             │ HTTP + Bearer Token
-┌──────────────▼─────────────▼────────────┐
-│         APPLICATION LAYER (Laravel 11)  │
-│   Middleware (Auth, Role, Sanctum)       │
-│   Web Controllers ←→ API Controllers    │
-│   Eloquent Models (7 Models)             │
-└──────────────────────┬───────────────────┘
-                       │ SQL
-┌──────────────────────▼───────────────────┐
-│           DATA LAYER                     │
-│       MySQL 8.0 — db_elearning           │
-│           (7 Tabel)                      │
-└──────────────────────────────────────────┘
-```
-
-## 3.3 Desain Database (ERD)
-
-Sistem menggunakan 7 tabel relasional dengan relasi sebagai berikut:
-
-| Tabel | Fungsi | Relasi |
-|-------|--------|--------|
-| `users` | Akun dosen & mahasiswa | — |
-| `kelas` | Data kelas milik dosen | users (dosen_id) |
-| `enrollments` | Relasi mahasiswa ↔ kelas | users, kelas |
-| `materi` | Konten pembelajaran per kelas | kelas |
-| `progress` | Status per materi per mahasiswa | users, materi |
-| `kuis` | Soal pilihan ganda per materi quiz | materi |
-| `hasil_kuis` | Riwayat pengerjaan dan nilai | users, materi |
-
-**Skema Relasi:**
-```
-users ──< kelas          (1 dosen punya banyak kelas)
-users ──< enrollments >── kelas   (mahasiswa enroll banyak kelas)
-users ──< progress >── materi     (mahasiswa punya progres per materi)
-users ──< hasil_kuis >── materi   (mahasiswa punya riwayat kuis)
-kelas ──< materi         (1 kelas punya banyak materi)
-materi ──< kuis          (1 materi quiz punya banyak soal)
-```
-
-## 3.4 Desain REST API
-
-REST API dibangun di atas Laravel Sanctum dengan **12 endpoint** yang dikelompokkan dalam 4 area:
-
-| Grup | Endpoint | Method | Auth |
-|------|----------|--------|------|
-| **Auth** | `/api/login` | POST | ❌ |
-| | `/api/register` | POST | ❌ |
-| | `/api/logout` | POST | ✅ |
-| | `/api/me` | GET | ✅ |
-| **Dashboard** | `/api/dashboard` | GET | ✅ |
-| **Kelas** | `/api/kelas` | GET | ✅ |
-| | `/api/kelas-saya` | GET | ✅ |
-| | `/api/kelas/{id}` | GET | ✅ |
-| | `/api/kelas/{id}/enroll` | POST | ✅ |
-| **Materi** | `/api/materi/{id}` | GET | ✅ |
-| | `/api/materi/{id}/complete` | POST | ✅ |
-| | `/api/materi/{id}/submit-quiz` | POST | ✅ |
-
-## 3.5 Desain Aplikasi Android
-
-Aplikasi Android terdiri dari **5 Activities**, **2 Adapters**, dan **3 Helper Classes**:
-
-| Komponen | File | Fungsi |
-|----------|------|--------|
-| Activity | `LoginActivity.java` | Form login, validasi, simpan sesi |
-| Activity | `DashboardActivity.java` | Ringkasan kelas & progress, logout |
-| Activity | `BrowseKelasActivity.java` | Daftar semua kelas dari API |
-| Activity | `DetailKelasActivity.java` | Detail kelas, enroll, daftar materi |
-| Activity | `MateriActivity.java` | Konten video/text/quiz, submit |
-| Adapter | `KelasAdapter.java` | RecyclerView item kelas |
-| Adapter | `MateriAdapter.java` | RecyclerView item materi |
-| Helper | `ApiClient.java` | Konfigurasi Retrofit + OkHttp interceptor |
-| Helper | `ApiService.java` | Interface definisi 12 endpoint |
-| Helper | `SessionManager.java` | SharedPreferences untuk token & profil |
-
----
-
-# BAB IV — IMPLEMENTASI DAN PENGUJIAN
-
-## 4.1 Lingkungan Pengembangan
-
-| Komponen | Spesifikasi |
-|----------|-------------|
-| **OS** | Windows 11 |
-| **Web Server** | XAMPP (Apache 2.4 + MySQL 8.0) |
-| **PHP** | PHP 8.2 |
-| **Framework** | Laravel 11 |
-| **IDE Web** | Visual Studio Code |
-| **IDE Mobile** | Android Studio Ladybug |
-| **Java** | JDK 17 (Android Studio bundled JBR) |
-| **Build Tool** | Gradle 8.4 |
-| **Android SDK** | API Level 34 (Android 14) |
-| **Min Android** | API Level 24 (Android 7.0) |
-
-## 4.2 Implementasi Backend (Laravel)
-
-### 4.2.1 Sequential Learning Logic
-
-Logika inti sequential learning diimplementasikan di `MateriController::show()`:
-
-```php
-// Cek apakah materi sebelumnya sudah selesai
-if ($materi->urutan > 1) {
-    $materiSebelumnya = Materi::where('kelas_id', $materi->kelas_id)
-        ->where('urutan', $materi->urutan - 1)
-        ->first();
-
-    $progressSebelumnya = Progress::where('user_id', $user->id)
-        ->where('materi_id', $materiSebelumnya->id)
-        ->first();
-
-    if (!$progressSebelumnya || $progressSebelumnya->status !== 'completed') {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Selesaikan materi sebelumnya terlebih dahulu.'
-        ], 403);
-    }
-}
-```
-
-### 4.2.2 Quiz Auto-Grading Logic
-
-```php
-$benar = 0;
-foreach ($soalList as $soal) {
-    $userJawab = $jawaban[$soal->id] ?? null;
-    $isBenar = ($userJawab === $soal->jawaban_benar);
-    if ($isBenar) $benar++;
-}
-
-$nilai = $totalSoal > 0 ? round(($benar / $totalSoal) * 100) : 0;
-$lulus = $nilai >= 70; // Nilai minimum kelulusan
-
-if ($lulus) {
-    Progress::updateOrCreate(
-        ['user_id' => $user->id, 'materi_id' => $id],
-        ['status' => 'completed', 'tanggal_selesai' => now()]
-    );
-}
-```
-
-### 4.2.3 Role-Based Dashboard
-
-```php
-public function index(Request $request) {
-    $user = $request->user();
-    if ($user->role === 'dosen') {
-        // Statistik dosen: total kelas, total mahasiswa
-        return $this->dosenDashboard($user);
-    } else {
-        // Mahasiswa: kelas enrolled + progress per kelas
-        return $this->mahasiswaDashboard($user);
-    }
-}
-```
-
-## 4.3 Implementasi Android
-
-### 4.3.1 Retrofit + OkHttp Interceptor
-
-```java
-// ApiClient.java - Menyisipkan Bearer Token otomatis
-httpClient.addInterceptor(new Interceptor() {
-    @Override
-    public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request().newBuilder()
-            .header("Authorization", "Bearer " + token)
-            .header("Accept", "application/json")
-            .build();
-        return chain.proceed(request);
-    }
-});
-```
-
-### 4.3.2 YouTube WebView Fix (Error 153)
-
-```java
-// Konversi URL YouTube ke format embed
-private String convertToYouTubeEmbed(String url) {
-    if (url.contains("youtu.be/")) {
-        String id = url.substring(url.lastIndexOf("/") + 1);
-        return "https://www.youtube.com/embed/" + id;
-    }
-    if (url.contains("watch?v=")) {
-        String id = url.substring(url.indexOf("watch?v=") + 8);
-        return "https://www.youtube.com/embed/" + id;
-    }
-    return url;
-}
-
-// Gunakan loadDataWithBaseURL agar YouTube mengenali origin
-webView.loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null);
-```
-
-### 4.3.3 Quiz Submission Fix
-
-```java
-// Bug fix: cari RadioButton dari RadioGroup, bukan dari Activity root
-RadioButton rb = rg.findViewById(checkedId);  // ✅ Benar
-// RadioButton rb = findViewById(checkedId);   // ❌ Menyebabkan NullPointerException
-```
-
-## 4.4 Pengujian White-box
-
-### 4.4.1 Pengujian Backend — PHPUnit (Laravel)
-
-Pengujian dilakukan pada 4 controller API menggunakan PHPUnit dengan basis data SQLite in-memory.
-
-| No | File Test | Jumlah TC | Cakupan Pengujian |
-|----|-----------|-----------|-------------------|
-| 1 | `AuthControllerTest.php` | 13 TC | Login sukses/gagal, registrasi, logout, validasi email |
-| 2 | `KelasControllerTest.php` | 11 TC | Daftar kelas, detail, enroll, kelas-saya, duplikat enroll |
-| 3 | `MateriControllerTest.php` | 10 TC | Sequential lock, complete materi, submit quiz, batas percobaan |
-| 4 | `DashboardControllerTest.php` | 8 TC | Dashboard dosen vs mahasiswa, statistik |
-| | **Total** | **42 TC** | |
-
-**Contoh Test Case Kritis:**
-
-```php
-// TC: Sequential Learning — Mahasiswa tidak bisa akses materi ke-2 sebelum selesai materi ke-1
-public function test_materi_kedua_terkunci_jika_pertama_belum_selesai()
-{
-    $response = $this->actingAs($this->mahasiswa)
-        ->getJson('/api/materi/' . $this->materi2->id);
-
-    $response->assertStatus(403)
-             ->assertJson(['message' => 'Selesaikan materi sebelumnya terlebih dahulu.']);
-}
-```
-
-**Hasil:** ✅ **42/42 Test Cases PASSED**
-
----
-
-### 4.4.2 Pengujian Frontend — JUnit 4 (Android)
-
-Pengujian dilakukan pada komponen inti Android menggunakan JUnit 4 dan Robolectric.
-
-| No | File Test | Jumlah TC | Cakupan Pengujian |
-|----|-----------|-----------|-------------------|
-| 1 | `SessionManagerTest.java` | 9 TC | saveToken, getToken, saveUser, isLoggedIn, logout, overwrite |
-| 2 | `ApiClientTest.java` | 5 TC | Service creation, token injection, null token handling |
-| 3 | `KelasAdapterTest.java` | 4 TC | getItemCount, empty list, field mapping, progress |
-| 4 | `MateriAdapterTest.java` | 6 TC | getItemCount, tipe icon mapping, enrollment flag |
-| 5 | `InputValidationTest.java` | 8 TC | Email format, password kosong, JSON body, Bearer token |
-| | **Total** | **32 TC** | |
-
-**Contoh Test Case Kritis:**
-
-```java
-// TC: Logout harus menghapus semua data session
-@Test
-public void test_logout_hapus_semua_data() {
-    sessionManager.saveToken("test_token");
-    sessionManager.saveUser(1, "User", "user@test.com", "mahasiswa");
-    assertTrue(sessionManager.isLoggedIn());
-
-    sessionManager.logout();
-
-    assertFalse(sessionManager.isLoggedIn());
-    assertNull(sessionManager.getToken());
-    assertEquals("", sessionManager.getUserName());
-}
-```
-
-**Hasil:** ✅ **32/32 Test Cases PASSED — BUILD SUCCESSFUL**
-
----
-
-### 4.4.3 Rekap Total Pengujian
-
-| Platform | Jumlah TC | Passed | Failed | Status |
-|----------|-----------|--------|--------|--------|
-| Laravel API (PHPUnit) | 42 | 42 | 0 | ✅ PASSED |
-| Android (JUnit 4) | 32 | 32 | 0 | ✅ PASSED |
-| **Total** | **74** | **74** | **0** | ✅ **ALL PASSED** |
-
-## 4.5 Bug yang Ditemukan dan Diperbaiki
-
-| No | Bug | Penyebab | Solusi |
-|----|-----|----------|--------|
-| 1 | YouTube Error 153 di WebView | `loadData()` tidak set `baseUrl`, YouTube menolak request karena origin kosong | Ganti ke `loadDataWithBaseURL("https://www.youtube.com", ...)` dan tambah `WebChromeClient` |
-| 2 | Gagal submit quiz (silent crash) | `findViewById(checkedId)` mencari RadioButton dari Activity root, bukan dari RadioGroup → NullPointerException | Ganti ke `rg.findViewById(checkedId)` |
-| 3 | Field `selesai` selalu `false` | `KelasController` menggunakan kolom `selesai` yang tidak ada, seharusnya `status === 'completed'` | Perbaiki kondisi cek progress ke `$progress->status === 'completed'` |
-
-## 4.6 Rencana Penerapan Pipeline CI/CD
-
-*Continuous Integration / Continuous Deployment* (CI/CD) adalah praktik otomasi dalam pengembangan perangkat lunak yang memungkinkan proses build, test, dan deploy berjalan secara otomatis setiap kali ada perubahan kode yang di-push ke repository.
-
-Karena proyek ini menggunakan **GitHub** sebagai platform version control, rencana CI/CD menggunakan **GitHub Actions** sebagai alat otomasi pipeline.
-
-### 4.6.1 Tujuan Penerapan CI/CD
-
-| Tujuan | Penjelasan |
-|--------|------------|
-| **Otomasi Testing** | Setiap push ke branch `master` akan otomatis menjalankan 74 test cases (PHPUnit + JUnit) |
-| **Deteksi Bug Dini** | Pipeline akan gagal dan memberi notifikasi jika ada test yang tidak lulus |
-| **Otomasi Build APK** | Setiap rilis baru akan otomatis build file `app-debug.apk` tanpa intervensi manual |
-| **Deployment Otomatis** | Jika semua test lulus, kode otomatis di-deploy ke server staging/produksi |
-
-### 4.6.2 Tahapan Pipeline
-
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   TRIGGER   │ →  │    BUILD    │ →  │    TEST     │ →  │   DEPLOY    │
-│  git push   │    │ composer    │    │  PHPUnit    │    │ php artisan │
-│  ke master  │    │ gradle      │    │  JUnit      │    │ serve/VPS   │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-```
-
-| Stage | Alat | Proses |
-|-------|------|--------|
-| **Build** | Composer, Gradle | Install dependencies, compile assets |
-| **Test** | PHPUnit, JUnit 4 | Jalankan 42 + 32 = 74 test cases |
-| **Package** | Gradle assembleDebug | Build file APK Android |
-| **Deploy** | SSH / Artisan | Migrasikan DB + restart server |
-
-### 4.6.3 Rencana Konfigurasi GitHub Actions
-
-Berikut adalah rancangan file konfigurasi pipeline `.github/workflows/ci.yml` yang akan dibuat:
-
-```yaml
-name: Journey Learn LMS — CI/CD Pipeline
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  # ─── Stage 1: Laravel Backend Test ───────────────────
-  laravel-test:
-    name: Laravel PHPUnit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP 8.2
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, pdo_sqlite
-
-      - name: Install Composer Dependencies
-        run: composer install --no-interaction --prefer-dist
-        working-directory: ./LMS-Laravel
-
-      - name: Copy .env.testing
-        run: cp .env.example .env.testing
-        working-directory: ./LMS-Laravel
-
-      - name: Generate App Key
-        run: php artisan key:generate --env=testing
-        working-directory: ./LMS-Laravel
-
-      - name: Run PHPUnit Tests (42 TC)
-        run: php artisan test --filter=Api
-        working-directory: ./LMS-Laravel
-
-  # ─── Stage 2: Android Unit Test ──────────────────────
-  android-test:
-    name: Android JUnit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Run Android Unit Tests (32 TC)
-        run: ./gradlew testDebugUnitTest
-        working-directory: ./JourneyLearnLMS-Android
-
-  # ─── Stage 3: Build APK ──────────────────────────────
-  build-apk:
-    name: Build Android APK
-    runs-on: ubuntu-latest
-    needs: [ laravel-test, android-test ]  # Hanya build jika test lulus
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
-        working-directory: ./JourneyLearnLMS-Android
-
-      - name: Upload APK as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: journey-learn-lms-debug
-          path: JourneyLearnLMS-Android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-### 4.6.4 Alur Otomasi yang Diharapkan
-
-```mermaid
-flowchart LR
-    A["Developer\npush ke GitHub"] --> B["GitHub Actions\nTrigger"]
-    B --> C["Stage 1\nLaravel PHPUnit\n42 Test Cases"]
-    B --> D["Stage 2\nAndroid JUnit\n32 Test Cases"]
-    C --> E{Semua\ntest lulus?}
-    D --> E
-    E -->|Ya| F["Stage 3\nBuild APK"]
-    E -->|Tidak| G["❌ Pipeline Gagal\nNotifikasi ke Developer"]
-    F --> H["✅ APK tersedia\ndi GitHub Artifacts"]
-```
-
-> **Status saat ini:** Pipeline CI/CD **belum diterapkan** (masih dalam tahap rencana). Build dan test saat ini dijalankan secara manual menggunakan perintah Gradle dan PHPUnit di lingkungan lokal. Implementasi GitHub Actions menjadi salah satu item pengembangan lanjutan yang direkomendasikan.
-
----
-
-# BAB V — RENCANA EVALUASI DAN KELUARAN PROYEK
-
-## 5.1 Keluaran / Deliverables
-
-Berikut adalah keluaran (*deliverables*) yang dihasilkan dari proyek **Journey Learn LMS**:
-
-| No | Deliverable | Deskripsi | Status |
-|----|-------------|-----------|--------|
-| 1 | **Aplikasi Web Fungsional** | Sistem LMS berbasis Laravel 11 dengan fitur manajemen kelas, materi (video/text/quiz), enrollment, dan progress mahasiswa yang dapat diakses via browser | ✅ Selesai |
-| 2 | **Aplikasi Mobile Android** | APK Android Native (Java) berukuran 6.4 MB yang mendukung login, browse kelas, akses materi, dan submit kuis | ✅ Selesai |
-| 3 | **RESTful API** | 12 endpoint API dengan autentikasi Bearer Token (Laravel Sanctum) sebagai jembatan antara backend dan aplikasi mobile | ✅ Selesai |
-| 4 | **Dokumentasi Teknis** | File `README.md`, `ANDROID_DAN_API.md`, `ARSITEKTUR_DAN_SDLC.md` yang mencakup arsitektur, endpoint API, dan panduan penggunaan | ✅ Selesai |
-| 5 | **Laporan Proyek** | Laporan lengkap mengikuti format template yang mencakup latar belakang, landasan teori, metodologi, implementasi, dan pengujian | ✅ Selesai |
-| 6 | **Hasil Pengujian** | Laporan white-box testing dengan total **74 test cases** (42 PHPUnit + 32 JUnit) — semua PASSED | ✅ Selesai |
-| 7 | **Rencana CI/CD** | Rancangan pipeline GitHub Actions untuk otomasi build, test, dan deploy (dokumentasi `.github/workflows/ci.yml`) | 📋 Rencana |
-
-## 5.2 Indikator Keberhasilan
-
-Keberhasilan proyek diukur berdasarkan indikator-indikator berikut:
-
-### Fungsionalitas Sesuai Spesifikasi
-
-| Indikator | Target | Hasil | Status |
-|-----------|--------|-------|--------|
-| Login & autentikasi berhasil | Token Sanctum diterima | ✅ Berfungsi di web & Android | ✅ Tercapai |
-| Sequential learning berjalan | Materi N+1 terkunci jika N belum selesai | ✅ Dikonfirmasi via test case | ✅ Tercapai |
-| Quiz auto-grading | Nilai dihitung otomatis, lulus jika ≥ 70 | ✅ Berfungsi dengan batas 3x percobaan | ✅ Tercapai |
-| Progress tracking | Status per materi tersimpan di database | ✅ Tabel `progress` berfungsi | ✅ Tercapai |
-| Role-based access | Dosen ≠ Mahasiswa dalam hak akses | ✅ Middleware role berjalan | ✅ Tercapai |
-
-### Integrasi Backend dan Frontend / Mobile Berjalan Lancar
-
-| Indikator | Target | Hasil | Status |
-|-----------|--------|-------|--------|
-| Web ↔ Database | Laravel Eloquent → MySQL | ✅ 7 tabel terhubung | ✅ Tercapai |
-| Android ↔ API | Retrofit + OkHttp → Laravel API | ✅ 12 endpoint terpanggil dengan benar | ✅ Tercapai |
-| Token propagasi | Bearer token dikirim di setiap request | ✅ OkHttp Interceptor berfungsi | ✅ Tercapai |
-| YouTube di WebView | Video diputar tanpa Error 153 | ✅ Setelah fix `loadDataWithBaseURL` | ✅ Tercapai |
-| Quiz submit Android | Jawaban JSON dikirim & dinilai server | ✅ Setelah fix `rg.findViewById` | ✅ Tercapai |
-
-### Penerapan Standar Keamanan Berhasil
-
-| Indikator | Target | Hasil | Status |
-|-----------|--------|-------|--------|
-| Autentikasi API | Semua endpoint protected memerlukan token valid | ✅ Sanctum middleware aktif | ✅ Tercapai |
-| CSRF Protection | Semua form web terlindungi CSRF | ✅ Laravel CSRF token built-in | ✅ Tercapai |
-| SQL Injection Prevention | Query menggunakan Eloquent ORM (parameter binding) | ✅ Tidak ada raw query tanpa binding | ✅ Tercapai |
-| XSS Prevention | Output di Blade template di-escape otomatis | ✅ `{{ }}` Blade escaping aktif | ✅ Tercapai |
-| Role Authorization | Dosen tidak bisa enroll; mahasiswa tidak bisa buat kelas | ✅ Dikonfirmasi via test + middleware | ✅ Tercapai |
-| Token Expiry | Token lama dihapus saat login baru | ✅ `$user->tokens()->delete()` sebelum buat token baru | ✅ Tercapai |
-
-### Rekap Keberhasilan Keseluruhan
-
-```
-Deliverables:          7 / 7   (6 selesai, 1 rencana)
-Fungsionalitas:        5 / 5   ✅ Semua tercapai
-Integrasi:             5 / 5   ✅ Semua berjalan
-Keamanan:              6 / 6   ✅ Semua diterapkan
-White-box Testing:    74 / 74  ✅ 100% PASSED
-```
-
----
-
-# BAB VI — PENUTUP
-
-## 6.1 Kesimpulan
-
-Berdasarkan hasil pengembangan dan pengujian yang telah dilakukan, dapat disimpulkan:
-
-1. **Berhasil dirancang dan diimplementasikan** sistem LMS terpadu berbasis *Client-Server* menggunakan Laravel 11 (backend/web), MySQL 8.0 (database), dan Android Native Java (mobile), dengan arsitektur MVC yang terstruktur dan modular.
-
-2. **Berhasil dibangun RESTful API** dengan 12 endpoint yang aman menggunakan autentikasi Bearer Token Laravel Sanctum, memungkinkan komunikasi data yang efisien antara backend dan aplikasi Android.
-
-3. **Berhasil diimplementasikan fitur sequential learning** yang memastikan mahasiswa mengakses materi secara berurutan, serta **sistem kuis otomatis** dengan auto-grading, batas maksimal 3 percobaan, dan nilai minimum 70 untuk kelulusan.
-
-4. **Pengujian white-box berhasil dilaksanakan** dengan total **74 test cases** (42 PHPUnit + 32 JUnit) dan seluruhnya **PASSED** tanpa satupun kegagalan, membuktikan kebenaran logika inti aplikasi.
-
-5. **Tiga bug kritis berhasil teridentifikasi dan diperbaiki** selama proses pengujian, yaitu: YouTube Error 153, NullPointerException pada submit quiz, dan kesalahan pengecekan status progress.
-
-## 6.2 Saran dan Pengembangan Lanjutan
-
-Untuk pengembangan lebih lanjut, disarankan:
-
-| No | Fitur | Deskripsi |
-|----|-------|-----------|
-| 1 | **Push Notification** | Notifikasi saat ada materi baru atau kuis tersedia |
-| 2 | **Fitur Registrasi Mobile** | Form registrasi langsung dari aplikasi Android |
-| 3 | **Upload File PDF/PPT** | Materi tidak hanya video/text, tapi juga file dokumen |
-| 4 | **Sertifikat Kelulusan** | PDF sertifikat otomatis saat mahasiswa menyelesaikan semua materi |
-| 5 | **Live Chat** | Fitur diskusi antara dosen dan mahasiswa dalam kelas |
-| 6 | **CI/CD Pipeline** | Otomasi build dan deployment menggunakan GitHub Actions |
-| 7 | **Deployment Publik** | Deploy ke VPS dengan domain publik agar bisa diakses secara online |
-| 8 | **Platform iOS** | Pengembangan aplikasi untuk platform iOS menggunakan Swift atau Flutter |
-
----
-
-# DAFTAR PUSTAKA
-
-1. Laravel Documentation. (2024). *Laravel 11 Official Documentation*. https://laravel.com/docs/11.x
-
-2. Laravel Sanctum. (2024). *API Token Authentication*. https://laravel.com/docs/11.x/sanctum
-
-3. Square Inc. (2024). *Retrofit 2 — A type-safe HTTP client for Android and Java*. https://square.github.io/retrofit/
-
-4. Google Inc. (2024). *Android Developer Documentation*. https://developer.android.com
-
-5. Ellis, R. K. (2009). *A Field Guide to Learning Management Systems*. ASTD Learning Circuits.
-
-6. Fowler, M. (2002). *Patterns of Enterprise Application Architecture*. Addison-Wesley.
-
-7. Beizer, B. (1995). *Black-Box Testing: Techniques for Functional Testing of Software and Systems*. Wiley.
-
-8. OkHttp. (2024). *OkHttp — An HTTP client for Android and Java*. https://square.github.io/okhttp/
-
-9. Google Inc. (2024). *Material Design Guidelines*. https://m3.material.io/
-
-10. MySQL. (2024). *MySQL 8.0 Reference Manual*. https://dev.mysql.com/doc/refman/8.0/en/
-
----
-
-# LAMPIRAN
-
-## Lampiran A — Struktur Proyek Laravel
-
-```
-LMS-Laravel/
-├── app/Http/Controllers/Api/    ← 4 API Controllers
-├── app/Models/                  ← 7 Eloquent Models
-├── routes/api.php               ← 12 route API
-├── tests/Feature/Api/           ← 42 PHPUnit test cases
-└── database/migrations/         ← 7 migrasi tabel
-```
-
-## Lampiran B — Struktur Proyek Android
-
-```
-JourneyLearnLMS-Android/
-├── app/src/main/java/.../       ← 10 Java files (5 Activity + 2 Adapter + 3 Helper)
-├── app/src/main/res/layout/     ← 8 XML layouts
-├── app/src/test/java/.../       ← 32 JUnit test cases
-└── app/build/outputs/apk/debug/ ← app-debug.apk (6.4 MB)
-```
-
-## Lampiran C — Screenshot Antarmuka
-
-> *[Lampirkan screenshot halaman Login, Dashboard, Browse Kelas, Detail Kelas, dan Materi]*
-
-## Lampiran D — Hasil Test Report
-
-**Laravel (PHPUnit):**
-```
-PASS  Tests\Feature\Api\AuthControllerTest      (13 tests)
-PASS  Tests\Feature\Api\KelasControllerTest     (11 tests)
-PASS  Tests\Feature\Api\MateriControllerTest    (10 tests)
-PASS  Tests\Feature\Api\DashboardControllerTest (8 tests)
-
-Tests: 42 passed
-Duration: ~5s
-```
-
-**Android (JUnit):**
-```
-BUILD SUCCESSFUL in 9m 16s
-Tests run: 32, Failures: 0, Errors: 0, Skipped: 0
-```
-
-## Lampiran E — Link Repository
-
-- **GitHub:** https://github.com/RizkyHerdiansyah1/Learning-management-system
-- **APK Download:** https://github.com/RizkyHerdiansyah1/Learning-management-system/raw/master/apk/JourneyLearnLMS.apk
-
----
-
-*Laporan ini disusun sebagai bagian dari Proyek Akhir mata kuliah [Nama Mata Kuliah]*  
-*Program Studi Rekayasa Keamanan Siber — Politeknik Siber dan Sandi Negara — 2026*
+﻿[!]#[!] [!]L[!]A[!]P[!]O[!]R[!]A[!]N[!] [!]P[!]R[!]O[!]Y[!]E[!]K[!] [!]A[!]K[!]H[!]I[!]R[!][!]
+[!]#[!]#[!] [!]P[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]M[!]a[!]n[!]a[!]g[!]e[!]m[!]e[!]n[!]t[!] [!]S[!]y[!]s[!]t[!]e[!]m[!] [!]T[!]e[!]r[!]p[!]a[!]d[!]u[!] [!]B[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!] [!]d[!]a[!]n[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]*[!]*[!]D[!]i[!]s[!]u[!]s[!]u[!]n[!] [!]O[!]l[!]e[!]h[!]:[!]*[!]*[!][!]
+[!][!]
+[!]|[!] [!]N[!]a[!]m[!]a[!] [!]M[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]|[!] [!]N[!]I[!]M[!] [!]|[!][!]
+[!]|[!] [!]:[!]-[!]-[!]-[!] [!]|[!] [!]:[!]-[!]-[!]-[!] [!]|[!][!]
+[!]|[!] [!]R[!]i[!]z[!]k[!]y[!] [!]H[!]e[!]r[!]d[!]i[!]a[!]n[!]s[!]y[!]a[!]h[!] [!]|[!] [!][[!]N[!]I[!]M[!] [!]A[!]n[!]d[!]a[!]][!] [!]|[!][!]
+[!][!]
+[!]*[!]*[!]P[!]r[!]o[!]g[!]r[!]a[!]m[!] [!]S[!]t[!]u[!]d[!]i[!]:[!]*[!]*[!] [!]R[!]e[!]k[!]a[!]y[!]a[!]s[!]a[!] [!]K[!]e[!]a[!]m[!]a[!]n[!]a[!]n[!] [!]S[!]i[!]b[!]e[!]r[!] [!] [!][!]
+[!]*[!]*[!]I[!]n[!]s[!]t[!]i[!]t[!]u[!]s[!]i[!]:[!]*[!]*[!] [!]P[!]o[!]l[!]i[!]t[!]e[!]k[!]n[!]i[!]k[!] [!]S[!]i[!]b[!]e[!]r[!] [!]d[!]a[!]n[!] [!]S[!]a[!]n[!]d[!]i[!] [!]N[!]e[!]g[!]a[!]r[!]a[!] [!] [!][!]
+[!]*[!]*[!]T[!]a[!]h[!]u[!]n[!] [!]A[!]k[!]a[!]d[!]e[!]m[!]i[!]k[!]:[!]*[!]*[!] [!]2[!]0[!]2[!]5[!]/[!]2[!]0[!]2[!]6[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]B[!]A[!]B[!] [!]I[!] [!]—[!] [!]P[!]E[!]N[!]D[!]A[!]H[!]U[!]L[!]U[!]A[!]N[!][!]
+[!][!]
+[!]#[!]#[!] [!]1[!].[!]1[!] [!]L[!]a[!]t[!]a[!]r[!] [!]B[!]e[!]l[!]a[!]k[!]a[!]n[!]g[!] [!]M[!]a[!]s[!]a[!]l[!]a[!]h[!][!]
+[!][!]
+[!]P[!]e[!]r[!]k[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]t[!]e[!]k[!]n[!]o[!]l[!]o[!]g[!]i[!] [!]i[!]n[!]f[!]o[!]r[!]m[!]a[!]s[!]i[!] [!]y[!]a[!]n[!]g[!] [!]p[!]e[!]s[!]a[!]t[!] [!]m[!]e[!]n[!]d[!]o[!]r[!]o[!]n[!]g[!] [!]t[!]r[!]a[!]n[!]s[!]f[!]o[!]r[!]m[!]a[!]s[!]i[!] [!]b[!]e[!]s[!]a[!]r[!] [!]d[!]a[!]l[!]a[!]m[!] [!]d[!]u[!]n[!]i[!]a[!] [!]p[!]e[!]n[!]d[!]i[!]d[!]i[!]k[!]a[!]n[!],[!] [!]d[!]a[!]r[!]i[!] [!]m[!]e[!]t[!]o[!]d[!]e[!] [!]k[!]o[!]n[!]v[!]e[!]n[!]s[!]i[!]o[!]n[!]a[!]l[!] [!]t[!]a[!]t[!]a[!]p[!] [!]m[!]u[!]k[!]a[!] [!]m[!]e[!]n[!]u[!]j[!]u[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]d[!]i[!]g[!]i[!]t[!]a[!]l[!] [!]y[!]a[!]n[!]g[!] [!]f[!]l[!]e[!]k[!]s[!]i[!]b[!]e[!]l[!] [!]d[!]a[!]n[!] [!]t[!]e[!]r[!]u[!]k[!]u[!]r[!].[!] [!]K[!]h[!]u[!]s[!]u[!]s[!]n[!]y[!]a[!] [!]d[!]i[!] [!]l[!]i[!]n[!]g[!]k[!]u[!]n[!]g[!]a[!]n[!] [!]p[!]e[!]r[!]g[!]u[!]r[!]u[!]a[!]n[!] [!]t[!]i[!]n[!]g[!]g[!]i[!],[!] [!]k[!]e[!]b[!]u[!]t[!]u[!]h[!]a[!]n[!] [!]a[!]k[!]a[!]n[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]m[!]a[!]n[!]a[!]j[!]e[!]m[!]e[!]n[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]([!]*[!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]M[!]a[!]n[!]a[!]g[!]e[!]m[!]e[!]n[!]t[!] [!]S[!]y[!]s[!]t[!]e[!]m[!]*[!] [!]/[!] [!]L[!]M[!]S[!])[!] [!]y[!]a[!]n[!]g[!] [!]t[!]e[!]r[!]i[!]n[!]t[!]e[!]g[!]r[!]a[!]s[!]i[!] [!]s[!]e[!]m[!]a[!]k[!]i[!]n[!] [!]t[!]i[!]n[!]g[!]g[!]i[!] [!]u[!]n[!]t[!]u[!]k[!] [!]m[!]e[!]n[!]d[!]u[!]k[!]u[!]n[!]g[!] [!]p[!]r[!]o[!]s[!]e[!]s[!] [!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]-[!]m[!]e[!]n[!]g[!]a[!]j[!]a[!]r[!] [!]y[!]a[!]n[!]g[!] [!]e[!]f[!]i[!]s[!]i[!]e[!]n[!],[!] [!]t[!]e[!]r[!]s[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!],[!] [!]d[!]a[!]n[!] [!]d[!]a[!]p[!]a[!]t[!] [!]d[!]i[!]p[!]a[!]n[!]t[!]a[!]u[!] [!]s[!]e[!]c[!]a[!]r[!]a[!] [!]r[!]e[!]a[!]l[!]-[!]t[!]i[!]m[!]e[!].[!][!]
+[!][!]
+[!]N[!]a[!]m[!]u[!]n[!],[!] [!]b[!]a[!]n[!]y[!]a[!]k[!] [!]i[!]n[!]s[!]t[!]i[!]t[!]u[!]s[!]i[!] [!]p[!]e[!]n[!]d[!]i[!]d[!]i[!]k[!]a[!]n[!] [!]d[!]i[!] [!]I[!]n[!]d[!]o[!]n[!]e[!]s[!]i[!]a[!] [!]m[!]a[!]s[!]i[!]h[!] [!]m[!]e[!]n[!]g[!]h[!]a[!]d[!]a[!]p[!]i[!] [!]s[!]e[!]j[!]u[!]m[!]l[!]a[!]h[!] [!]t[!]a[!]n[!]t[!]a[!]n[!]g[!]a[!]n[!] [!]d[!]a[!]l[!]a[!]m[!] [!]m[!]e[!]n[!]g[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]L[!]M[!]S[!],[!] [!]d[!]i[!] [!]a[!]n[!]t[!]a[!]r[!]a[!]n[!]y[!]a[!]:[!][!]
+[!][!]
+[!]1[!].[!] [!]*[!]*[!]K[!]e[!]t[!]e[!]r[!]g[!]a[!]n[!]t[!]u[!]n[!]g[!]a[!]n[!] [!]p[!]a[!]d[!]a[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]b[!]e[!]r[!]b[!]a[!]y[!]a[!]r[!]*[!]*[!] [!]s[!]e[!]p[!]e[!]r[!]t[!]i[!] [!]M[!]o[!]o[!]d[!]l[!]e[!],[!] [!]G[!]o[!]o[!]g[!]l[!]e[!] [!]C[!]l[!]a[!]s[!]s[!]r[!]o[!]o[!]m[!],[!] [!]a[!]t[!]a[!]u[!] [!]E[!]d[!]m[!]o[!]d[!]o[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]m[!]e[!]r[!]l[!]u[!]k[!]a[!]n[!] [!]b[!]i[!]a[!]y[!]a[!] [!]b[!]e[!]r[!]l[!]a[!]n[!]g[!]g[!]a[!]n[!]a[!]n[!] [!]d[!]a[!]n[!] [!]k[!]e[!]t[!]e[!]r[!]b[!]a[!]t[!]a[!]s[!]a[!]n[!] [!]k[!]u[!]s[!]t[!]o[!]m[!]i[!]s[!]a[!]s[!]i[!].[!][!]
+[!]2[!].[!] [!]*[!]*[!]A[!]b[!]s[!]e[!]n[!]n[!]y[!]a[!] [!]i[!]n[!]t[!]e[!]g[!]r[!]a[!]s[!]i[!] [!]m[!]u[!]l[!]t[!]i[!]-[!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!]*[!]*[!] [!]—[!] [!]m[!]a[!]y[!]o[!]r[!]i[!]t[!]a[!]s[!] [!]L[!]M[!]S[!] [!]y[!]a[!]n[!]g[!] [!]a[!]d[!]a[!] [!]h[!]a[!]n[!]y[!]a[!] [!]m[!]e[!]n[!]d[!]u[!]k[!]u[!]n[!]g[!] [!]a[!]k[!]s[!]e[!]s[!] [!]v[!]i[!]a[!] [!]w[!]e[!]b[!] [!]b[!]r[!]o[!]w[!]s[!]e[!]r[!],[!] [!]t[!]a[!]n[!]p[!]a[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]m[!]o[!]b[!]i[!]l[!]e[!] [!]n[!]a[!]t[!]i[!]v[!]e[!] [!]y[!]a[!]n[!]g[!] [!]r[!]e[!]s[!]p[!]o[!]n[!]s[!]i[!]f[!].[!][!]
+[!]3[!].[!] [!]*[!]*[!]K[!]e[!]t[!]e[!]r[!]b[!]a[!]t[!]a[!]s[!]a[!]n[!] [!]f[!]i[!]t[!]u[!]r[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]t[!]e[!]r[!]s[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!]*[!]*[!],[!] [!]s[!]e[!]p[!]e[!]r[!]t[!]i[!] [!]*[!]s[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]l[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!]*[!] [!]([!]m[!]a[!]t[!]e[!]r[!]i[!] [!]t[!]e[!]r[!]b[!]u[!]k[!]a[!] [!]s[!]e[!]c[!]a[!]r[!]a[!] [!]b[!]e[!]r[!]u[!]r[!]u[!]t[!]a[!]n[!])[!] [!]d[!]a[!]n[!] [!]p[!]e[!]m[!]b[!]a[!]t[!]a[!]s[!]a[!]n[!] [!]p[!]e[!]r[!]c[!]o[!]b[!]a[!]a[!]n[!] [!]k[!]u[!]i[!]s[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]d[!]o[!]r[!]o[!]n[!]g[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]b[!]e[!]l[!]a[!]j[!]a[!]r[!] [!]l[!]e[!]b[!]i[!]h[!] [!]d[!]i[!]s[!]i[!]p[!]l[!]i[!]n[!].[!][!]
+[!][!]
+[!]D[!]a[!]r[!]i[!] [!]p[!]e[!]r[!]m[!]a[!]s[!]a[!]l[!]a[!]h[!]a[!]n[!] [!]t[!]e[!]r[!]s[!]e[!]b[!]u[!]t[!],[!] [!]d[!]i[!]k[!]e[!]m[!]b[!]a[!]n[!]g[!]k[!]a[!]n[!]l[!]a[!]h[!] [!]*[!]*[!]J[!]o[!]u[!]r[!]n[!]e[!]y[!] [!]L[!]e[!]a[!]r[!]n[!] [!]L[!]M[!]S[!]*[!]*[!] [!]—[!] [!]s[!]e[!]b[!]u[!]a[!]h[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]o[!]n[!]l[!]i[!]n[!]e[!] [!]*[!]o[!]p[!]e[!]n[!]-[!]s[!]o[!]u[!]r[!]c[!]e[!]*[!] [!]b[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]*[!]*[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!]*[!]*[!] [!]([!]b[!]a[!]c[!]k[!]e[!]n[!]d[!]/[!]w[!]e[!]b[!])[!] [!]d[!]a[!]n[!] [!]*[!]*[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]([!]J[!]a[!]v[!]a[!])[!]*[!]*[!] [!]([!]m[!]o[!]b[!]i[!]l[!]e[!])[!].[!] [!]S[!]i[!]s[!]t[!]e[!]m[!] [!]i[!]n[!]i[!] [!]d[!]i[!]r[!]a[!]n[!]c[!]a[!]n[!]g[!] [!]u[!]n[!]t[!]u[!]k[!]:[!][!]
+[!][!]
+[!]-[!] [!]M[!]e[!]n[!]y[!]e[!]d[!]i[!]a[!]k[!]a[!]n[!] [!]m[!]a[!]n[!]a[!]j[!]e[!]m[!]e[!]n[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]m[!]a[!]t[!]e[!]r[!]i[!],[!] [!]d[!]a[!]n[!] [!]k[!]u[!]i[!]s[!] [!]d[!]a[!]l[!]a[!]m[!] [!]s[!]a[!]t[!]u[!] [!]e[!]k[!]o[!]s[!]i[!]s[!]t[!]e[!]m[!] [!]t[!]e[!]r[!]i[!]n[!]t[!]e[!]g[!]r[!]a[!]s[!]i[!][!]
+[!]-[!] [!]M[!]e[!]n[!]d[!]u[!]k[!]u[!]n[!]g[!] [!]t[!]i[!]g[!]a[!] [!]t[!]i[!]p[!]e[!] [!]k[!]o[!]n[!]t[!]e[!]n[!]:[!] [!]*[!]*[!]V[!]i[!]d[!]e[!]o[!]*[!]*[!] [!]([!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]e[!]m[!]b[!]e[!]d[!])[!],[!] [!]*[!]*[!]T[!]e[!]x[!]t[!]*[!]*[!],[!] [!]d[!]a[!]n[!] [!]*[!]*[!]Q[!]u[!]i[!]z[!]*[!]*[!] [!]p[!]i[!]l[!]i[!]h[!]a[!]n[!] [!]g[!]a[!]n[!]d[!]a[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]*[!]a[!]u[!]t[!]o[!]-[!]g[!]r[!]a[!]d[!]i[!]n[!]g[!]*[!][!]
+[!]-[!] [!]M[!]e[!]n[!]e[!]r[!]a[!]p[!]k[!]a[!]n[!] [!]*[!]s[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]l[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!]*[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]m[!]a[!]s[!]t[!]i[!]k[!]a[!]n[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]m[!]e[!]m[!]a[!]h[!]a[!]m[!]i[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]s[!]e[!]c[!]a[!]r[!]a[!] [!]b[!]e[!]r[!]t[!]a[!]h[!]a[!]p[!][!]
+[!]-[!] [!]M[!]e[!]m[!]b[!]e[!]r[!]i[!]k[!]a[!]n[!] [!]a[!]k[!]s[!]e[!]s[!] [!]m[!]e[!]l[!]a[!]l[!]u[!]i[!] [!]*[!]*[!]w[!]e[!]b[!] [!]b[!]r[!]o[!]w[!]s[!]e[!]r[!]*[!]*[!] [!]([!]u[!]n[!]t[!]u[!]k[!] [!]d[!]o[!]s[!]e[!]n[!] [!]d[!]a[!]n[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!])[!] [!]s[!]e[!]r[!]t[!]a[!] [!]*[!]*[!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]*[!]*[!] [!]([!]u[!]n[!]t[!]u[!]k[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!])[!][!]
+[!][!]
+[!]#[!]#[!] [!]1[!].[!]2[!] [!]R[!]u[!]m[!]u[!]s[!]a[!]n[!] [!]M[!]a[!]s[!]a[!]l[!]a[!]h[!][!]
+[!][!]
+[!]B[!]e[!]r[!]d[!]a[!]s[!]a[!]r[!]k[!]a[!]n[!] [!]l[!]a[!]t[!]a[!]r[!] [!]b[!]e[!]l[!]a[!]k[!]a[!]n[!]g[!] [!]d[!]i[!] [!]a[!]t[!]a[!]s[!],[!] [!]r[!]u[!]m[!]u[!]s[!]a[!]n[!] [!]m[!]a[!]s[!]a[!]l[!]a[!]h[!] [!]d[!]a[!]l[!]a[!]m[!] [!]p[!]r[!]o[!]y[!]e[!]k[!] [!]i[!]n[!]i[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]b[!]e[!]r[!]i[!]k[!]u[!]t[!]:[!][!]
+[!][!]
+[!]1[!].[!] [!]B[!]a[!]g[!]a[!]i[!]m[!]a[!]n[!]a[!] [!]m[!]e[!]r[!]a[!]n[!]c[!]a[!]n[!]g[!] [!]d[!]a[!]n[!] [!]m[!]e[!]n[!]g[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]t[!]e[!]r[!]p[!]a[!]d[!]u[!] [!]b[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]*[!]C[!]l[!]i[!]e[!]n[!]t[!]-[!]S[!]e[!]r[!]v[!]e[!]r[!]*[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]t[!]e[!]k[!]n[!]o[!]l[!]o[!]g[!]i[!] [!]*[!]*[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!]*[!]*[!],[!] [!]*[!]*[!]M[!]y[!]S[!]Q[!]L[!]*[!]*[!],[!] [!]d[!]a[!]n[!] [!]*[!]*[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]([!]J[!]a[!]v[!]a[!])[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]m[!]a[!]m[!]p[!]u[!] [!]m[!]e[!]n[!]d[!]u[!]k[!]u[!]n[!]g[!] [!]p[!]r[!]o[!]s[!]e[!]s[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]o[!]n[!]l[!]i[!]n[!]e[!]?[!][!]
+[!]2[!].[!] [!]B[!]a[!]g[!]a[!]i[!]m[!]a[!]n[!]a[!] [!]m[!]e[!]m[!]b[!]a[!]n[!]g[!]u[!]n[!] [!]*[!]*[!]R[!]E[!]S[!]T[!]f[!]u[!]l[!] [!]A[!]P[!]I[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]a[!]m[!]a[!]n[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]j[!]e[!]m[!]b[!]a[!]t[!]a[!]n[!] [!]k[!]o[!]m[!]u[!]n[!]i[!]k[!]a[!]s[!]i[!] [!]a[!]n[!]t[!]a[!]r[!]a[!] [!]b[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]w[!]e[!]b[!] [!]d[!]a[!]n[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]m[!]o[!]b[!]i[!]l[!]e[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]?[!][!]
+[!]3[!].[!] [!]B[!]a[!]g[!]a[!]i[!]m[!]a[!]n[!]a[!] [!]m[!]e[!]n[!]g[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]f[!]i[!]t[!]u[!]r[!] [!]*[!]*[!]s[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]l[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!]*[!]*[!] [!]d[!]a[!]n[!] [!]*[!]*[!]s[!]i[!]s[!]t[!]e[!]m[!] [!]k[!]u[!]i[!]s[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!]*[!]*[!] [!]([!]a[!]u[!]t[!]o[!]-[!]g[!]r[!]a[!]d[!]i[!]n[!]g[!],[!] [!]b[!]a[!]t[!]a[!]s[!] [!]p[!]e[!]r[!]c[!]o[!]b[!]a[!]a[!]n[!],[!] [!]n[!]i[!]l[!]a[!]i[!] [!]m[!]i[!]n[!]i[!]m[!]u[!]m[!])[!] [!]a[!]g[!]a[!]r[!] [!]p[!]r[!]o[!]s[!]e[!]s[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]l[!]e[!]b[!]i[!]h[!] [!]t[!]e[!]r[!]s[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!]?[!][!]
+[!]4[!].[!] [!]B[!]a[!]g[!]a[!]i[!]m[!]a[!]n[!]a[!] [!]h[!]a[!]s[!]i[!]l[!] [!]*[!]*[!]p[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]w[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!]*[!]*[!] [!]t[!]e[!]r[!]h[!]a[!]d[!]a[!]p[!] [!]k[!]o[!]m[!]p[!]o[!]n[!]e[!]n[!] [!]k[!]r[!]i[!]t[!]i[!]s[!] [!]s[!]i[!]s[!]t[!]e[!]m[!],[!] [!]b[!]a[!]i[!]k[!] [!]p[!]a[!]d[!]a[!] [!]s[!]i[!]s[!]i[!] [!]b[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]([!]L[!]a[!]r[!]a[!]v[!]e[!]l[!])[!] [!]m[!]a[!]u[!]p[!]u[!]n[!] [!]f[!]r[!]o[!]n[!]t[!]e[!]n[!]d[!] [!]m[!]o[!]b[!]i[!]l[!]e[!] [!]([!]A[!]n[!]d[!]r[!]o[!]i[!]d[!])[!]?[!][!]
+[!][!]
+[!]#[!]#[!] [!]1[!].[!]3[!] [!]T[!]u[!]j[!]u[!]a[!]n[!] [!]P[!]r[!]o[!]y[!]e[!]k[!][!]
+[!][!]
+[!]T[!]u[!]j[!]u[!]a[!]n[!] [!]y[!]a[!]n[!]g[!] [!]i[!]n[!]g[!]i[!]n[!] [!]d[!]i[!]c[!]a[!]p[!]a[!]i[!] [!]m[!]e[!]l[!]a[!]l[!]u[!]i[!] [!]p[!]r[!]o[!]y[!]e[!]k[!] [!]i[!]n[!]i[!] [!]a[!]d[!]a[!]l[!]a[!]h[!]:[!][!]
+[!][!]
+[!]1[!].[!] [!]M[!]e[!]r[!]a[!]n[!]c[!]a[!]n[!]g[!] [!]d[!]a[!]n[!] [!]m[!]e[!]n[!]g[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]L[!]M[!]S[!] [!]t[!]e[!]r[!]p[!]a[!]d[!]u[!] [!]b[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]*[!]C[!]l[!]i[!]e[!]n[!]t[!]-[!]S[!]e[!]r[!]v[!]e[!]r[!]*[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]*[!]*[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!]*[!]*[!],[!] [!]*[!]*[!]M[!]y[!]S[!]Q[!]L[!] [!]8[!].[!]0[!]*[!]*[!],[!] [!]d[!]a[!]n[!] [!]*[!]*[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]([!]J[!]a[!]v[!]a[!])[!]*[!]*[!].[!][!]
+[!]2[!].[!] [!]M[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]k[!]a[!]n[!] [!]*[!]*[!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]w[!]e[!]b[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]m[!]i[!]l[!]i[!]k[!]i[!] [!]f[!]u[!]n[!]g[!]s[!]i[!]o[!]n[!]a[!]l[!]i[!]t[!]a[!]s[!] [!]m[!]a[!]n[!]a[!]j[!]e[!]m[!]e[!]n[!] [!]k[!]e[!]l[!]a[!]s[!] [!]d[!]a[!]n[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]u[!]n[!]t[!]u[!]k[!] [!]d[!]o[!]s[!]e[!]n[!],[!] [!]s[!]e[!]r[!]t[!]a[!] [!]a[!]k[!]s[!]e[!]s[!] [!]b[!]e[!]l[!]a[!]j[!]a[!]r[!] [!]b[!]e[!]r[!]t[!]a[!]h[!]a[!]p[!] [!]u[!]n[!]t[!]u[!]k[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!].[!][!]
+[!]3[!].[!] [!]M[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]k[!]a[!]n[!] [!]*[!]*[!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]m[!]u[!]n[!]g[!]k[!]i[!]n[!]k[!]a[!]n[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]m[!]e[!]n[!]g[!]a[!]k[!]s[!]e[!]s[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]m[!]e[!]m[!]p[!]e[!]l[!]a[!]j[!]a[!]r[!]i[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]([!]v[!]i[!]d[!]e[!]o[!]/[!]t[!]e[!]x[!]t[!]/[!]q[!]u[!]i[!]z[!])[!],[!] [!]d[!]a[!]n[!] [!]m[!]e[!]m[!]a[!]n[!]t[!]a[!]u[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!] [!]b[!]e[!]l[!]a[!]j[!]a[!]r[!] [!]d[!]a[!]r[!]i[!] [!]p[!]e[!]r[!]a[!]n[!]g[!]k[!]a[!]t[!] [!]m[!]o[!]b[!]i[!]l[!]e[!].[!][!]
+[!]4[!].[!] [!]M[!]e[!]m[!]b[!]a[!]n[!]g[!]u[!]n[!] [!]*[!]*[!]R[!]E[!]S[!]T[!]f[!]u[!]l[!] [!]A[!]P[!]I[!]*[!]*[!] [!]([!]1[!]2[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!])[!] [!]y[!]a[!]n[!]g[!] [!]s[!]t[!]a[!]b[!]i[!]l[!] [!]d[!]a[!]n[!] [!]a[!]m[!]a[!]n[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]a[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]t[!]o[!]k[!]e[!]n[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!].[!][!]
+[!]5[!].[!] [!]M[!]e[!]n[!]d[!]o[!]k[!]u[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]d[!]a[!]n[!] [!]m[!]e[!]n[!]j[!]a[!]l[!]a[!]n[!]k[!]a[!]n[!] [!]*[!]*[!]p[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]w[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!]*[!]*[!] [!]s[!]e[!]b[!]a[!]n[!]y[!]a[!]k[!] [!]*[!]*[!]7[!]4[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!]*[!]*[!] [!]g[!]u[!]n[!]a[!] [!]m[!]e[!]m[!]v[!]a[!]l[!]i[!]d[!]a[!]s[!]i[!] [!]k[!]e[!]b[!]e[!]n[!]a[!]r[!]a[!]n[!] [!]l[!]o[!]g[!]i[!]k[!]a[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]1[!].[!]4[!] [!]B[!]a[!]t[!]a[!]s[!]a[!]n[!] [!]P[!]r[!]o[!]y[!]e[!]k[!][!]
+[!][!]
+[!]U[!]n[!]t[!]u[!]k[!] [!]m[!]e[!]n[!]j[!]a[!]g[!]a[!] [!]f[!]o[!]k[!]u[!]s[!] [!]d[!]a[!]n[!] [!]k[!]e[!]l[!]a[!]y[!]a[!]k[!]a[!]n[!] [!]d[!]a[!]l[!]a[!]m[!] [!]k[!]e[!]r[!]a[!]n[!]g[!]k[!]a[!] [!]w[!]a[!]k[!]t[!]u[!] [!]p[!]e[!]n[!]g[!]e[!]r[!]j[!]a[!]a[!]n[!],[!] [!]b[!]a[!]t[!]a[!]s[!]a[!]n[!] [!]p[!]r[!]o[!]y[!]e[!]k[!] [!]i[!]n[!]i[!] [!]m[!]e[!]l[!]i[!]p[!]u[!]t[!]i[!]:[!][!]
+[!][!]
+[!]1[!].[!] [!]*[!]*[!]F[!]u[!]n[!]g[!]s[!]i[!]o[!]n[!]a[!]l[!]i[!]t[!]a[!]s[!]:[!]*[!]*[!] [!]S[!]i[!]s[!]t[!]e[!]m[!] [!]h[!]a[!]n[!]y[!]a[!] [!]m[!]e[!]n[!]c[!]a[!]k[!]u[!]p[!] [!]f[!]i[!]t[!]u[!]r[!] [!]m[!]a[!]n[!]a[!]j[!]e[!]m[!]e[!]n[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]([!]v[!]i[!]d[!]e[!]o[!]/[!]t[!]e[!]x[!]t[!]/[!]q[!]u[!]i[!]z[!])[!],[!] [!]e[!]n[!]r[!]o[!]l[!]l[!]m[!]e[!]n[!]t[!],[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]t[!]r[!]a[!]c[!]k[!]i[!]n[!]g[!],[!] [!]d[!]a[!]n[!] [!]k[!]u[!]i[!]s[!] [!]p[!]i[!]l[!]i[!]h[!]a[!]n[!] [!]g[!]a[!]n[!]d[!]a[!].[!] [!]F[!]i[!]t[!]u[!]r[!] [!]c[!]h[!]a[!]t[!],[!] [!]n[!]o[!]t[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!] [!]p[!]u[!]s[!]h[!],[!] [!]d[!]a[!]n[!] [!]s[!]e[!]r[!]t[!]i[!]f[!]i[!]k[!]a[!]t[!] [!]b[!]e[!]l[!]u[!]m[!] [!]t[!]e[!]r[!]m[!]a[!]s[!]u[!]k[!].[!][!]
+[!]2[!].[!] [!]*[!]*[!]P[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]M[!]o[!]b[!]i[!]l[!]e[!]:[!]*[!]*[!] [!]A[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]d[!]i[!]k[!]e[!]m[!]b[!]a[!]n[!]g[!]k[!]a[!]n[!] [!]u[!]n[!]t[!]u[!]k[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]*[!]*[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]*[!]*[!] [!]([!]m[!]i[!]n[!] [!]S[!]D[!]K[!] [!]2[!]4[!] [!]/[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]7[!].[!]0[!])[!] [!]d[!]a[!]n[!] [!]b[!]e[!]l[!]u[!]m[!] [!]m[!]e[!]n[!]c[!]a[!]k[!]u[!]p[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]i[!]O[!]S[!].[!][!]
+[!]3[!].[!] [!]*[!]*[!]D[!]e[!]p[!]l[!]o[!]y[!]m[!]e[!]n[!]t[!]:[!]*[!]*[!] [!]S[!]i[!]s[!]t[!]e[!]m[!] [!]d[!]i[!]j[!]a[!]l[!]a[!]n[!]k[!]a[!]n[!] [!]p[!]a[!]d[!]a[!] [!]e[!]n[!]v[!]i[!]r[!]o[!]n[!]m[!]e[!]n[!]t[!] [!]*[!]*[!]l[!]o[!]c[!]a[!]l[!]h[!]o[!]s[!]t[!]*[!]*[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]X[!]A[!]M[!]P[!]P[!] [!]([!]A[!]p[!]a[!]c[!]h[!]e[!] [!]+[!] [!]M[!]y[!]S[!]Q[!]L[!])[!] [!]d[!]a[!]n[!] [!]b[!]e[!]l[!]u[!]m[!] [!]d[!]i[!]-[!]d[!]e[!]p[!]l[!]o[!]y[!] [!]k[!]e[!] [!]s[!]e[!]r[!]v[!]e[!]r[!] [!]p[!]u[!]b[!]l[!]i[!]k[!].[!][!]
+[!]4[!].[!] [!]*[!]*[!]A[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]M[!]o[!]b[!]i[!]l[!]e[!]:[!]*[!]*[!] [!]F[!]i[!]t[!]u[!]r[!] [!]r[!]e[!]g[!]i[!]s[!]t[!]r[!]a[!]s[!]i[!] [!]a[!]k[!]u[!]n[!] [!]p[!]a[!]d[!]a[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]b[!]e[!]l[!]u[!]m[!] [!]t[!]e[!]r[!]s[!]e[!]d[!]i[!]a[!];[!] [!]a[!]k[!]u[!]n[!] [!]d[!]i[!]b[!]u[!]a[!]t[!] [!]m[!]e[!]l[!]a[!]l[!]u[!]i[!] [!]w[!]e[!]b[!] [!]a[!]t[!]a[!]u[!] [!]A[!]P[!]I[!] [!]l[!]a[!]n[!]g[!]s[!]u[!]n[!]g[!].[!][!]
+[!]5[!].[!] [!]*[!]*[!]T[!]i[!]p[!]e[!] [!]M[!]a[!]t[!]e[!]r[!]i[!] [!]V[!]i[!]d[!]e[!]o[!]:[!]*[!]*[!] [!]H[!]a[!]n[!]y[!]a[!] [!]m[!]e[!]n[!]d[!]u[!]k[!]u[!]n[!]g[!] [!]v[!]i[!]d[!]e[!]o[!] [!]d[!]a[!]r[!]i[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]*[!]*[!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!]*[!]*[!] [!]([!]v[!]i[!]a[!] [!]e[!]m[!]b[!]e[!]d[!] [!]i[!]f[!]r[!]a[!]m[!]e[!] [!]d[!]i[!] [!]W[!]e[!]b[!]V[!]i[!]e[!]w[!])[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]1[!].[!]5[!] [!]M[!]a[!]n[!]f[!]a[!]a[!]t[!] [!]P[!]r[!]o[!]y[!]e[!]k[!][!]
+[!][!]
+[!]|[!] [!]P[!]i[!]h[!]a[!]k[!] [!]|[!] [!]M[!]a[!]n[!]f[!]a[!]a[!]t[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]*[!]*[!]M[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!]*[!]*[!] [!]|[!] [!]A[!]k[!]s[!]e[!]s[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]k[!]a[!]p[!]a[!]n[!] [!]s[!]a[!]j[!]a[!] [!]v[!]i[!]a[!] [!]w[!]e[!]b[!] [!]a[!]t[!]a[!]u[!] [!]H[!]P[!],[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]t[!]e[!]r[!]s[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!],[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]t[!]e[!]r[!]u[!]k[!]u[!]r[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]D[!]o[!]s[!]e[!]n[!]*[!]*[!] [!]|[!] [!]K[!]e[!]m[!]u[!]d[!]a[!]h[!]a[!]n[!] [!]k[!]e[!]l[!]o[!]l[!]a[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]m[!]a[!]t[!]e[!]r[!]i[!],[!] [!]d[!]a[!]n[!] [!]m[!]e[!]m[!]a[!]n[!]t[!]a[!]u[!] [!]p[!]e[!]r[!]k[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]I[!]n[!]s[!]t[!]i[!]t[!]u[!]s[!]i[!]*[!]*[!] [!]|[!] [!]A[!]l[!]t[!]e[!]r[!]n[!]a[!]t[!]i[!]f[!] [!]L[!]M[!]S[!] [!]m[!]a[!]n[!]d[!]i[!]r[!]i[!] [!]t[!]a[!]n[!]p[!]a[!] [!]b[!]i[!]a[!]y[!]a[!] [!]b[!]e[!]r[!]l[!]a[!]n[!]g[!]g[!]a[!]n[!]a[!]n[!],[!] [!]m[!]u[!]d[!]a[!]h[!] [!]d[!]i[!]k[!]u[!]s[!]t[!]o[!]m[!]i[!]s[!]a[!]s[!]i[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]P[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]*[!]*[!] [!]|[!] [!]R[!]e[!]f[!]e[!]r[!]e[!]n[!]s[!]i[!] [!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!] [!]R[!]E[!]S[!]T[!] [!]A[!]P[!]I[!] [!]+[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!] [!]|[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]B[!]A[!]B[!] [!]I[!]I[!] [!]—[!] [!]L[!]A[!]N[!]D[!]A[!]S[!]A[!]N[!] [!]T[!]E[!]O[!]R[!]I[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]1[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]M[!]a[!]n[!]a[!]g[!]e[!]m[!]e[!]n[!]t[!] [!]S[!]y[!]s[!]t[!]e[!]m[!] [!]([!]L[!]M[!]S[!])[!][!]
+[!][!]
+[!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]M[!]a[!]n[!]a[!]g[!]e[!]m[!]e[!]n[!]t[!] [!]S[!]y[!]s[!]t[!]e[!]m[!] [!]([!]L[!]M[!]S[!])[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]p[!]e[!]r[!]a[!]n[!]g[!]k[!]a[!]t[!] [!]l[!]u[!]n[!]a[!]k[!] [!]b[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]w[!]e[!]b[!] [!]y[!]a[!]n[!]g[!] [!]d[!]i[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]u[!]n[!]t[!]u[!]k[!] [!]m[!]e[!]r[!]e[!]n[!]c[!]a[!]n[!]a[!]k[!]a[!]n[!],[!] [!]m[!]e[!]n[!]g[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!],[!] [!]d[!]a[!]n[!] [!]m[!]e[!]n[!]i[!]l[!]a[!]i[!] [!]p[!]r[!]o[!]s[!]e[!]s[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!].[!] [!]F[!]i[!]t[!]u[!]r[!] [!]u[!]m[!]u[!]m[!] [!]L[!]M[!]S[!] [!]m[!]e[!]n[!]c[!]a[!]k[!]u[!]p[!] [!]m[!]a[!]n[!]a[!]j[!]e[!]m[!]e[!]n[!] [!]k[!]u[!]r[!]s[!]u[!]s[!],[!] [!]d[!]i[!]s[!]t[!]r[!]i[!]b[!]u[!]s[!]i[!] [!]k[!]o[!]n[!]t[!]e[!]n[!],[!] [!]p[!]e[!]n[!]i[!]l[!]a[!]i[!]a[!]n[!],[!] [!]d[!]a[!]n[!] [!]p[!]e[!]l[!]a[!]c[!]a[!]k[!]a[!]n[!] [!]k[!]e[!]m[!]a[!]j[!]u[!]a[!]n[!] [!]p[!]e[!]s[!]e[!]r[!]t[!]a[!] [!]d[!]i[!]d[!]i[!]k[!] [!]([!]E[!]l[!]l[!]i[!]s[!],[!] [!]2[!]0[!]0[!]9[!])[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]2[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!][!]
+[!][!]
+[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]f[!]r[!]a[!]m[!]e[!]w[!]o[!]r[!]k[!] [!]P[!]H[!]P[!] [!]o[!]p[!]e[!]n[!]-[!]s[!]o[!]u[!]r[!]c[!]e[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]g[!]i[!]k[!]u[!]t[!]i[!] [!]p[!]o[!]l[!]a[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]*[!]*[!]M[!]o[!]d[!]e[!]l[!]-[!]V[!]i[!]e[!]w[!]-[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!] [!]([!]M[!]V[!]C[!])[!]*[!]*[!].[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!] [!]([!]r[!]i[!]l[!]i[!]s[!]a[!]n[!] [!]2[!]0[!]2[!]4[!])[!] [!]m[!]e[!]n[!]g[!]h[!]a[!]d[!]i[!]r[!]k[!]a[!]n[!] [!]f[!]i[!]t[!]u[!]r[!]-[!]f[!]i[!]t[!]u[!]r[!] [!]m[!]o[!]d[!]e[!]r[!]n[!] [!]s[!]e[!]p[!]e[!]r[!]t[!]i[!]:[!][!]
+[!]-[!] [!]*[!]*[!]E[!]l[!]o[!]q[!]u[!]e[!]n[!]t[!] [!]O[!]R[!]M[!]*[!]*[!] [!]—[!] [!]m[!]e[!]n[!]y[!]e[!]d[!]e[!]r[!]h[!]a[!]n[!]a[!]k[!]a[!]n[!] [!]i[!]n[!]t[!]e[!]r[!]a[!]k[!]s[!]i[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]d[!]a[!]t[!]a[!]b[!]a[!]s[!]e[!] [!]r[!]e[!]l[!]a[!]s[!]i[!]o[!]n[!]a[!]l[!][!]
+[!]-[!] [!]*[!]*[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!]*[!]*[!] [!]—[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]a[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]t[!]o[!]k[!]e[!]n[!] [!]r[!]i[!]n[!]g[!]a[!]n[!] [!]u[!]n[!]t[!]u[!]k[!] [!]S[!]P[!]A[!] [!]d[!]a[!]n[!] [!]m[!]o[!]b[!]i[!]l[!]e[!] [!]a[!]p[!]p[!][!]
+[!]-[!] [!]*[!]*[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]B[!]r[!]e[!]e[!]z[!]e[!]*[!]*[!] [!]—[!] [!]s[!]t[!]a[!]r[!]t[!]e[!]r[!] [!]k[!]i[!]t[!] [!]a[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]m[!]i[!]n[!]i[!]m[!]a[!]l[!]i[!]s[!] [!]u[!]n[!]t[!]u[!]k[!] [!]w[!]e[!]b[!][!]
+[!]-[!] [!]*[!]*[!]A[!]r[!]t[!]i[!]s[!]a[!]n[!] [!]C[!]L[!]I[!]*[!]*[!] [!]—[!] [!]a[!]l[!]a[!]t[!] [!]b[!]a[!]r[!]i[!]s[!] [!]p[!]e[!]r[!]i[!]n[!]t[!]a[!]h[!] [!]u[!]n[!]t[!]u[!]k[!] [!]o[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]t[!]u[!]g[!]a[!]s[!] [!]d[!]e[!]v[!]e[!]l[!]o[!]p[!]m[!]e[!]n[!]t[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]3[!] [!]R[!]E[!]S[!]T[!]f[!]u[!]l[!] [!]A[!]P[!]I[!][!]
+[!][!]
+[!]*[!]R[!]e[!]p[!]r[!]e[!]s[!]e[!]n[!]t[!]a[!]t[!]i[!]o[!]n[!]a[!]l[!] [!]S[!]t[!]a[!]t[!]e[!] [!]T[!]r[!]a[!]n[!]s[!]f[!]e[!]r[!]*[!] [!]([!]R[!]E[!]S[!]T[!])[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]g[!]a[!]y[!]a[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]u[!]n[!]t[!]u[!]k[!] [!]m[!]e[!]m[!]b[!]a[!]n[!]g[!]u[!]n[!] [!]l[!]a[!]y[!]a[!]n[!]a[!]n[!] [!]w[!]e[!]b[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]p[!]r[!]o[!]t[!]o[!]k[!]o[!]l[!] [!]H[!]T[!]T[!]P[!].[!] [!]A[!]P[!]I[!] [!]R[!]E[!]S[!]T[!]f[!]u[!]l[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]m[!]e[!]t[!]o[!]d[!]e[!] [!]H[!]T[!]T[!]P[!] [!]s[!]t[!]a[!]n[!]d[!]a[!]r[!] [!]([!]G[!]E[!]T[!],[!] [!]P[!]O[!]S[!]T[!],[!] [!]P[!]U[!]T[!],[!] [!]D[!]E[!]L[!]E[!]T[!]E[!])[!] [!]d[!]a[!]n[!] [!]m[!]e[!]r[!]e[!]p[!]r[!]e[!]s[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]s[!]u[!]m[!]b[!]e[!]r[!] [!]d[!]a[!]y[!]a[!] [!]d[!]a[!]l[!]a[!]m[!] [!]f[!]o[!]r[!]m[!]a[!]t[!] [!]J[!]S[!]O[!]N[!].[!] [!]D[!]a[!]l[!]a[!]m[!] [!]p[!]r[!]o[!]y[!]e[!]k[!] [!]i[!]n[!]i[!],[!] [!]A[!]P[!]I[!] [!]d[!]i[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]j[!]e[!]m[!]b[!]a[!]t[!]a[!]n[!] [!]k[!]o[!]m[!]u[!]n[!]i[!]k[!]a[!]s[!]i[!] [!]a[!]n[!]t[!]a[!]r[!]a[!] [!]b[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]d[!]a[!]n[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]4[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!][!]
+[!][!]
+[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!] [!]m[!]e[!]n[!]y[!]e[!]d[!]i[!]a[!]k[!]a[!]n[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]a[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]b[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]t[!]o[!]k[!]e[!]n[!] [!]u[!]n[!]t[!]u[!]k[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]m[!]o[!]b[!]i[!]l[!]e[!] [!]d[!]a[!]n[!] [!]S[!]P[!]A[!] [!]([!]S[!]i[!]n[!]g[!]l[!]e[!] [!]P[!]a[!]g[!]e[!] [!]A[!]p[!]p[!]l[!]i[!]c[!]a[!]t[!]i[!]o[!]n[!])[!].[!] [!]S[!]e[!]t[!]i[!]a[!]p[!] [!]p[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!] [!]y[!]a[!]n[!]g[!] [!]l[!]o[!]g[!]i[!]n[!] [!]m[!]e[!]n[!]d[!]a[!]p[!]a[!]t[!]k[!]a[!]n[!] [!]*[!]*[!]P[!]e[!]r[!]s[!]o[!]n[!]a[!]l[!] [!]A[!]c[!]c[!]e[!]s[!]s[!] [!]T[!]o[!]k[!]e[!]n[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]d[!]i[!]s[!]i[!]m[!]p[!]a[!]n[!] [!]d[!]i[!] [!]t[!]a[!]b[!]e[!]l[!] [!]`[!]p[!]e[!]r[!]s[!]o[!]n[!]a[!]l[!]_[!]a[!]c[!]c[!]e[!]s[!]s[!]_[!]t[!]o[!]k[!]e[!]n[!]s[!]`[!] [!]d[!]a[!]n[!] [!]d[!]i[!]k[!]i[!]r[!]i[!]m[!]k[!]a[!]n[!] [!]p[!]a[!]d[!]a[!] [!]s[!]e[!]t[!]i[!]a[!]p[!] [!]r[!]e[!]q[!]u[!]e[!]s[!]t[!] [!]A[!]P[!]I[!] [!]m[!]e[!]l[!]a[!]l[!]u[!]i[!] [!]h[!]e[!]a[!]d[!]e[!]r[!] [!]`[!]A[!]u[!]t[!]h[!]o[!]r[!]i[!]z[!]a[!]t[!]i[!]o[!]n[!]:[!] [!]B[!]e[!]a[!]r[!]e[!]r[!] [!]<[!]t[!]o[!]k[!]e[!]n[!]>[!]`[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]5[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]([!]J[!]a[!]v[!]a[!])[!][!]
+[!][!]
+[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]b[!]a[!]h[!]a[!]s[!]a[!] [!]*[!]*[!]J[!]a[!]v[!]a[!]*[!]*[!] [!]([!]a[!]t[!]a[!]u[!] [!]K[!]o[!]t[!]l[!]i[!]n[!])[!] [!]u[!]n[!]t[!]u[!]k[!] [!]m[!]e[!]m[!]b[!]a[!]n[!]g[!]u[!]n[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]m[!]o[!]b[!]i[!]l[!]e[!] [!]y[!]a[!]n[!]g[!] [!]l[!]a[!]n[!]g[!]s[!]u[!]n[!]g[!] [!]b[!]e[!]r[!]j[!]a[!]l[!]a[!]n[!] [!]d[!]i[!] [!]a[!]t[!]a[!]s[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]o[!]p[!]e[!]r[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!].[!] [!]K[!]e[!]u[!]n[!]g[!]g[!]u[!]l[!]a[!]n[!]n[!]y[!]a[!] [!]d[!]i[!]b[!]a[!]n[!]d[!]i[!]n[!]g[!] [!]f[!]r[!]a[!]m[!]e[!]w[!]o[!]r[!]k[!] [!]c[!]r[!]o[!]s[!]s[!]-[!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]p[!]e[!]r[!]f[!]o[!]r[!]m[!]a[!] [!]y[!]a[!]n[!]g[!] [!]l[!]e[!]b[!]i[!]h[!] [!]o[!]p[!]t[!]i[!]m[!]a[!]l[!] [!]d[!]a[!]n[!] [!]a[!]k[!]s[!]e[!]s[!] [!]p[!]e[!]n[!]u[!]h[!] [!]k[!]e[!] [!]f[!]i[!]t[!]u[!]r[!] [!]p[!]e[!]r[!]a[!]n[!]g[!]k[!]a[!]t[!] [!]k[!]e[!]r[!]a[!]s[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]6[!] [!]R[!]e[!]t[!]r[!]o[!]f[!]i[!]t[!] [!]2[!][!]
+[!][!]
+[!]R[!]e[!]t[!]r[!]o[!]f[!]i[!]t[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]l[!]i[!]b[!]r[!]a[!]r[!]y[!] [!]H[!]T[!]T[!]P[!] [!]c[!]l[!]i[!]e[!]n[!]t[!] [!]u[!]n[!]t[!]u[!]k[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]y[!]a[!]n[!]g[!] [!]d[!]i[!]k[!]e[!]m[!]b[!]a[!]n[!]g[!]k[!]a[!]n[!] [!]o[!]l[!]e[!]h[!] [!]S[!]q[!]u[!]a[!]r[!]e[!].[!] [!]L[!]i[!]b[!]r[!]a[!]r[!]y[!] [!]i[!]n[!]i[!] [!]m[!]e[!]n[!]y[!]e[!]d[!]e[!]r[!]h[!]a[!]n[!]a[!]k[!]a[!]n[!] [!]p[!]r[!]o[!]s[!]e[!]s[!] [!]p[!]e[!]m[!]a[!]n[!]g[!]g[!]i[!]l[!]a[!]n[!] [!]R[!]E[!]S[!]T[!] [!]A[!]P[!]I[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]a[!]n[!]o[!]t[!]a[!]s[!]i[!] [!]s[!]e[!]p[!]e[!]r[!]t[!]i[!] [!]`[!]@[!]G[!]E[!]T[!]`[!],[!] [!]`[!]@[!]P[!]O[!]S[!]T[!]`[!],[!] [!]d[!]a[!]n[!] [!]`[!]@[!]B[!]o[!]d[!]y[!]`[!],[!] [!]s[!]e[!]r[!]t[!]a[!] [!]m[!]e[!]n[!]d[!]u[!]k[!]u[!]n[!]g[!] [!]k[!]o[!]n[!]v[!]e[!]r[!]s[!]i[!] [!]J[!]S[!]O[!]N[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]*[!]*[!]G[!]s[!]o[!]n[!]*[!]*[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]7[!] [!]S[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!][!]
+[!][!]
+[!]S[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]a[!]t[!]a[!]u[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]b[!]e[!]r[!]t[!]a[!]h[!]a[!]p[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]p[!]e[!]n[!]d[!]e[!]k[!]a[!]t[!]a[!]n[!] [!]p[!]e[!]d[!]a[!]g[!]o[!]g[!]i[!]s[!] [!]d[!]i[!] [!]m[!]a[!]n[!]a[!] [!]p[!]e[!]s[!]e[!]r[!]t[!]a[!] [!]d[!]i[!]d[!]i[!]k[!] [!]h[!]a[!]r[!]u[!]s[!] [!]m[!]e[!]n[!]y[!]e[!]l[!]e[!]s[!]a[!]i[!]k[!]a[!]n[!] [!]s[!]a[!]t[!]u[!] [!]u[!]n[!]i[!]t[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]s[!]e[!]b[!]e[!]l[!]u[!]m[!] [!]d[!]a[!]p[!]a[!]t[!] [!]m[!]e[!]n[!]g[!]a[!]k[!]s[!]e[!]s[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]b[!]e[!]r[!]i[!]k[!]u[!]t[!]n[!]y[!]a[!].[!] [!]P[!]e[!]n[!]d[!]e[!]k[!]a[!]t[!]a[!]n[!] [!]i[!]n[!]i[!] [!]m[!]e[!]n[!]d[!]o[!]r[!]o[!]n[!]g[!] [!]p[!]e[!]m[!]a[!]h[!]a[!]m[!]a[!]n[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]d[!]a[!]l[!]a[!]m[!] [!]d[!]a[!]n[!] [!]m[!]e[!]n[!]g[!]u[!]r[!]a[!]n[!]g[!]i[!] [!]*[!]s[!]k[!]i[!]p[!]p[!]i[!]n[!]g[!]*[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]p[!]e[!]n[!]t[!]i[!]n[!]g[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]2[!].[!]8[!] [!]W[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!] [!]T[!]e[!]s[!]t[!]i[!]n[!]g[!][!]
+[!][!]
+[!]W[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!] [!]t[!]e[!]s[!]t[!]i[!]n[!]g[!] [!]([!]a[!]t[!]a[!]u[!] [!]g[!]l[!]a[!]s[!]s[!]-[!]b[!]o[!]x[!] [!]t[!]e[!]s[!]t[!]i[!]n[!]g[!])[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]t[!]e[!]k[!]n[!]i[!]k[!] [!]p[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]p[!]e[!]r[!]a[!]n[!]g[!]k[!]a[!]t[!] [!]l[!]u[!]n[!]a[!]k[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]g[!]u[!]j[!]i[!] [!]s[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!] [!]i[!]n[!]t[!]e[!]r[!]n[!]a[!]l[!],[!] [!]a[!]l[!]u[!]r[!] [!]l[!]o[!]g[!]i[!]k[!]a[!],[!] [!]d[!]a[!]n[!] [!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!] [!]k[!]o[!]d[!]e[!] [!]p[!]r[!]o[!]g[!]r[!]a[!]m[!].[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!] [!]p[!]e[!]r[!]l[!]u[!] [!]m[!]e[!]n[!]g[!]e[!]t[!]a[!]h[!]u[!]i[!] [!]k[!]o[!]d[!]e[!] [!]s[!]u[!]m[!]b[!]e[!]r[!] [!]u[!]n[!]t[!]u[!]k[!] [!]m[!]e[!]r[!]a[!]n[!]c[!]a[!]n[!]g[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]c[!]a[!]k[!]u[!]p[!] [!]s[!]e[!]m[!]u[!]a[!] [!]j[!]a[!]l[!]u[!]r[!] [!]e[!]k[!]s[!]e[!]k[!]u[!]s[!]i[!],[!] [!]k[!]o[!]n[!]d[!]i[!]s[!]i[!] [!]b[!]a[!]t[!]a[!]s[!],[!] [!]d[!]a[!]n[!] [!]s[!]k[!]e[!]n[!]a[!]r[!]i[!]o[!] [!]k[!]e[!]s[!]a[!]l[!]a[!]h[!]a[!]n[!].[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]B[!]A[!]B[!] [!]I[!]I[!]I[!] [!]—[!] [!]M[!]E[!]T[!]O[!]D[!]O[!]L[!]O[!]G[!]I[!] [!]D[!]A[!]N[!] [!]D[!]E[!]S[!]A[!]I[!]N[!] [!]S[!]I[!]S[!]T[!]E[!]M[!][!]
+[!][!]
+[!]#[!]#[!] [!]3[!].[!]1[!] [!]M[!]o[!]d[!]e[!]l[!] [!]P[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]—[!] [!]W[!]a[!]t[!]e[!]r[!]f[!]a[!]l[!]l[!] [!]+[!] [!]I[!]t[!]e[!]r[!]a[!]s[!]i[!][!]
+[!][!]
+[!]P[!]r[!]o[!]y[!]e[!]k[!] [!]i[!]n[!]i[!] [!]d[!]i[!]k[!]e[!]m[!]b[!]a[!]n[!]g[!]k[!]a[!]n[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]m[!]o[!]d[!]e[!]l[!] [!]*[!]*[!]W[!]a[!]t[!]e[!]r[!]f[!]a[!]l[!]l[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]e[!]l[!]e[!]m[!]e[!]n[!] [!]I[!]t[!]e[!]r[!]a[!]t[!]i[!]f[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]t[!]e[!]r[!]d[!]i[!]r[!]i[!] [!]d[!]a[!]r[!]i[!] [!]7[!] [!]f[!]a[!]s[!]e[!]:[!][!]
+[!][!]
+[!]`[!]`[!]`[!][!]
+[!]P[!]l[!]a[!]n[!]n[!]i[!]n[!]g[!] [!]→[!] [!]A[!]n[!]a[!]l[!]y[!]s[!]i[!]s[!] [!]→[!] [!]D[!]e[!]s[!]i[!]g[!]n[!] [!]→[!] [!]D[!]e[!]v[!]e[!]l[!]o[!]p[!]m[!]e[!]n[!]t[!] [!]→[!] [!]T[!]e[!]s[!]t[!]i[!]n[!]g[!] [!]→[!] [!]D[!]e[!]p[!]l[!]o[!]y[!]m[!]e[!]n[!]t[!] [!]→[!] [!]M[!]a[!]i[!]n[!]t[!]e[!]n[!]a[!]n[!]c[!]e[!][!]
+[!] [!] [!] [!] [!]↑[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]I[!]t[!]e[!]r[!]a[!]s[!]i[!] [!]([!]j[!]i[!]k[!]a[!] [!]d[!]i[!]t[!]e[!]m[!]u[!]k[!]a[!]n[!] [!]b[!]u[!]g[!])[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]_[!]|[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]|[!] [!]F[!]a[!]s[!]e[!] [!]|[!] [!]D[!]u[!]r[!]a[!]s[!]i[!] [!]|[!] [!]A[!]k[!]t[!]i[!]v[!]i[!]t[!]a[!]s[!] [!]|[!] [!]O[!]u[!]t[!]p[!]u[!]t[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]P[!]l[!]a[!]n[!]n[!]i[!]n[!]g[!] [!]|[!] [!]4[!] [!]m[!]i[!]n[!]g[!]g[!]u[!] [!]|[!] [!]A[!]n[!]a[!]l[!]i[!]s[!]i[!]s[!] [!]k[!]e[!]b[!]u[!]t[!]u[!]h[!]a[!]n[!],[!] [!]u[!]s[!]e[!]r[!] [!]s[!]t[!]o[!]r[!]y[!],[!] [!]s[!]c[!]o[!]p[!]e[!] [!]|[!] [!]D[!]o[!]k[!]u[!]m[!]e[!]n[!] [!]r[!]e[!]q[!]u[!]i[!]r[!]e[!]m[!]e[!]n[!]t[!]s[!] [!]|[!][!]
+[!]|[!] [!]A[!]n[!]a[!]l[!]y[!]s[!]i[!]s[!] [!]|[!] [!]2[!] [!]m[!]i[!]n[!]g[!]g[!]u[!] [!]|[!] [!]A[!]u[!]d[!]i[!]t[!] [!]k[!]e[!]a[!]m[!]a[!]n[!]a[!]n[!],[!] [!]i[!]d[!]e[!]n[!]t[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!] [!]r[!]i[!]s[!]i[!]k[!]o[!] [!]|[!] [!]D[!]a[!]f[!]t[!]a[!]r[!] [!]i[!]s[!]s[!]u[!]e[!]s[!] [!]|[!][!]
+[!]|[!] [!]D[!]e[!]s[!]i[!]g[!]n[!] [!]|[!] [!]2[!] [!]m[!]i[!]n[!]g[!]g[!]u[!] [!]|[!] [!]E[!]R[!]D[!],[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]M[!]V[!]C[!],[!] [!]w[!]i[!]r[!]e[!]f[!]r[!]a[!]m[!]e[!] [!]U[!]I[!] [!]|[!] [!]D[!]e[!]s[!]a[!]i[!]n[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]|[!][!]
+[!]|[!] [!]D[!]e[!]v[!]e[!]l[!]o[!]p[!]m[!]e[!]n[!]t[!] [!]|[!] [!]8[!] [!]m[!]i[!]n[!]g[!]g[!]u[!] [!]|[!] [!]C[!]o[!]d[!]i[!]n[!]g[!] [!]3[!]7[!]0[!]0[!]+[!] [!]L[!]O[!]C[!] [!]([!]w[!]e[!]b[!] [!]+[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!])[!] [!]|[!] [!]S[!]o[!]u[!]r[!]c[!]e[!] [!]c[!]o[!]d[!]e[!] [!]|[!][!]
+[!]|[!] [!]T[!]e[!]s[!]t[!]i[!]n[!]g[!] [!]|[!] [!]2[!] [!]m[!]i[!]n[!]g[!]g[!]u[!] [!]|[!] [!]7[!]4[!] [!]w[!]h[!]i[!]t[!]e[!]b[!]o[!]x[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!] [!]|[!] [!]L[!]a[!]p[!]o[!]r[!]a[!]n[!] [!]p[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]|[!][!]
+[!]|[!] [!]D[!]e[!]p[!]l[!]o[!]y[!]m[!]e[!]n[!]t[!] [!]|[!] [!]1[!] [!]m[!]i[!]n[!]g[!]g[!]u[!] [!]|[!] [!]X[!]A[!]M[!]P[!]P[!] [!]l[!]o[!]c[!]a[!]l[!] [!]+[!] [!]b[!]u[!]i[!]l[!]d[!] [!]A[!]P[!]K[!] [!]|[!] [!]W[!]e[!]b[!] [!]l[!]i[!]v[!]e[!] [!]+[!] [!]A[!]P[!]K[!] [!]|[!][!]
+[!]|[!] [!]M[!]a[!]i[!]n[!]t[!]e[!]n[!]a[!]n[!]c[!]e[!] [!]|[!] [!]O[!]n[!]g[!]o[!]i[!]n[!]g[!] [!]|[!] [!]B[!]u[!]g[!] [!]f[!]i[!]x[!]e[!]s[!] [!]|[!] [!]U[!]p[!]d[!]a[!]t[!]e[!]d[!] [!]c[!]o[!]d[!]e[!]b[!]a[!]s[!]e[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!] [!]3[!].[!]2[!] [!]A[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]S[!]i[!]s[!]t[!]e[!]m[!][!]
+[!][!]
+[!]S[!]i[!]s[!]t[!]e[!]m[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]*[!]*[!]C[!]l[!]i[!]e[!]n[!]t[!]-[!]S[!]e[!]r[!]v[!]e[!]r[!] [!]3[!]-[!]L[!]a[!]y[!]e[!]r[!]*[!]*[!]:[!][!]
+[!][!]
+[!]`[!]`[!]`[!][!]
+[!]┌[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┐[!][!]
+[!]│[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]C[!]L[!]I[!]E[!]N[!]T[!] [!]L[!]A[!]Y[!]E[!]R[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!][!]
+[!]│[!] [!] [!] [!]W[!]e[!]b[!] [!]B[!]r[!]o[!]w[!]s[!]e[!]r[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]A[!]p[!]p[!] [!] [!] [!] [!] [!] [!] [!]│[!][!]
+[!]└[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┬[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┬[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┘[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!] [!]H[!]T[!]T[!]P[!] [!]+[!] [!]B[!]e[!]a[!]r[!]e[!]r[!] [!]T[!]o[!]k[!]e[!]n[!][!]
+[!]┌[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]▼[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]▼[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┐[!][!]
+[!]│[!] [!] [!] [!] [!] [!] [!] [!] [!] [!]A[!]P[!]P[!]L[!]I[!]C[!]A[!]T[!]I[!]O[!]N[!] [!]L[!]A[!]Y[!]E[!]R[!] [!]([!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!])[!] [!] [!]│[!][!]
+[!]│[!] [!] [!] [!]M[!]i[!]d[!]d[!]l[!]e[!]w[!]a[!]r[!]e[!] [!]([!]A[!]u[!]t[!]h[!],[!] [!]R[!]o[!]l[!]e[!],[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!])[!] [!] [!] [!] [!] [!] [!] [!]│[!][!]
+[!]│[!] [!] [!] [!]W[!]e[!]b[!] [!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]s[!] [!]←[!]→[!] [!]A[!]P[!]I[!] [!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]s[!] [!] [!] [!] [!]│[!][!]
+[!]│[!] [!] [!] [!]E[!]l[!]o[!]q[!]u[!]e[!]n[!]t[!] [!]M[!]o[!]d[!]e[!]l[!]s[!] [!]([!]7[!] [!]M[!]o[!]d[!]e[!]l[!]s[!])[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!][!]
+[!]└[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┬[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┘[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!] [!]S[!]Q[!]L[!][!]
+[!]┌[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]▼[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┐[!][!]
+[!]│[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]D[!]A[!]T[!]A[!] [!]L[!]A[!]Y[!]E[!]R[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!][!]
+[!]│[!] [!] [!] [!] [!] [!] [!] [!]M[!]y[!]S[!]Q[!]L[!] [!]8[!].[!]0[!] [!]—[!] [!]d[!]b[!]_[!]e[!]l[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!][!]
+[!]│[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]([!]7[!] [!]T[!]a[!]b[!]e[!]l[!])[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]│[!][!]
+[!]└[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┘[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!] [!]3[!].[!]3[!] [!]D[!]e[!]s[!]a[!]i[!]n[!] [!]D[!]a[!]t[!]a[!]b[!]a[!]s[!]e[!] [!]([!]E[!]R[!]D[!])[!][!]
+[!][!]
+[!]S[!]i[!]s[!]t[!]e[!]m[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]7[!] [!]t[!]a[!]b[!]e[!]l[!] [!]r[!]e[!]l[!]a[!]s[!]i[!]o[!]n[!]a[!]l[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]r[!]e[!]l[!]a[!]s[!]i[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]b[!]e[!]r[!]i[!]k[!]u[!]t[!]:[!][!]
+[!][!]
+[!]|[!] [!]T[!]a[!]b[!]e[!]l[!] [!]|[!] [!]F[!]u[!]n[!]g[!]s[!]i[!] [!]|[!] [!]R[!]e[!]l[!]a[!]s[!]i[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]`[!]u[!]s[!]e[!]r[!]s[!]`[!] [!]|[!] [!]A[!]k[!]u[!]n[!] [!]d[!]o[!]s[!]e[!]n[!] [!]&[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]|[!] [!]—[!] [!]|[!][!]
+[!]|[!] [!]`[!]k[!]e[!]l[!]a[!]s[!]`[!] [!]|[!] [!]D[!]a[!]t[!]a[!] [!]k[!]e[!]l[!]a[!]s[!] [!]m[!]i[!]l[!]i[!]k[!] [!]d[!]o[!]s[!]e[!]n[!] [!]|[!] [!]u[!]s[!]e[!]r[!]s[!] [!]([!]d[!]o[!]s[!]e[!]n[!]_[!]i[!]d[!])[!] [!]|[!][!]
+[!]|[!] [!]`[!]e[!]n[!]r[!]o[!]l[!]l[!]m[!]e[!]n[!]t[!]s[!]`[!] [!]|[!] [!]R[!]e[!]l[!]a[!]s[!]i[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]↔[!] [!]k[!]e[!]l[!]a[!]s[!] [!]|[!] [!]u[!]s[!]e[!]r[!]s[!],[!] [!]k[!]e[!]l[!]a[!]s[!] [!]|[!][!]
+[!]|[!] [!]`[!]m[!]a[!]t[!]e[!]r[!]i[!]`[!] [!]|[!] [!]K[!]o[!]n[!]t[!]e[!]n[!] [!]p[!]e[!]m[!]b[!]e[!]l[!]a[!]j[!]a[!]r[!]a[!]n[!] [!]p[!]e[!]r[!] [!]k[!]e[!]l[!]a[!]s[!] [!]|[!] [!]k[!]e[!]l[!]a[!]s[!] [!]|[!][!]
+[!]|[!] [!]`[!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]`[!] [!]|[!] [!]S[!]t[!]a[!]t[!]u[!]s[!] [!]p[!]e[!]r[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]p[!]e[!]r[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]|[!] [!]u[!]s[!]e[!]r[!]s[!],[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]|[!][!]
+[!]|[!] [!]`[!]k[!]u[!]i[!]s[!]`[!] [!]|[!] [!]S[!]o[!]a[!]l[!] [!]p[!]i[!]l[!]i[!]h[!]a[!]n[!] [!]g[!]a[!]n[!]d[!]a[!] [!]p[!]e[!]r[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]q[!]u[!]i[!]z[!] [!]|[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]|[!][!]
+[!]|[!] [!]`[!]h[!]a[!]s[!]i[!]l[!]_[!]k[!]u[!]i[!]s[!]`[!] [!]|[!] [!]R[!]i[!]w[!]a[!]y[!]a[!]t[!] [!]p[!]e[!]n[!]g[!]e[!]r[!]j[!]a[!]a[!]n[!] [!]d[!]a[!]n[!] [!]n[!]i[!]l[!]a[!]i[!] [!]|[!] [!]u[!]s[!]e[!]r[!]s[!],[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]|[!][!]
+[!][!]
+[!]*[!]*[!]S[!]k[!]e[!]m[!]a[!] [!]R[!]e[!]l[!]a[!]s[!]i[!]:[!]*[!]*[!][!]
+[!]`[!]`[!]`[!][!]
+[!]u[!]s[!]e[!]r[!]s[!] [!]─[!]─[!]<[!] [!]k[!]e[!]l[!]a[!]s[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]([!]1[!] [!]d[!]o[!]s[!]e[!]n[!] [!]p[!]u[!]n[!]y[!]a[!] [!]b[!]a[!]n[!]y[!]a[!]k[!] [!]k[!]e[!]l[!]a[!]s[!])[!][!]
+[!]u[!]s[!]e[!]r[!]s[!] [!]─[!]─[!]<[!] [!]e[!]n[!]r[!]o[!]l[!]l[!]m[!]e[!]n[!]t[!]s[!] [!]>[!]─[!]─[!] [!]k[!]e[!]l[!]a[!]s[!] [!] [!] [!]([!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]e[!]n[!]r[!]o[!]l[!]l[!] [!]b[!]a[!]n[!]y[!]a[!]k[!] [!]k[!]e[!]l[!]a[!]s[!])[!][!]
+[!]u[!]s[!]e[!]r[!]s[!] [!]─[!]─[!]<[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]>[!]─[!]─[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!] [!] [!] [!] [!]([!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]p[!]u[!]n[!]y[!]a[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!] [!]p[!]e[!]r[!] [!]m[!]a[!]t[!]e[!]r[!]i[!])[!][!]
+[!]u[!]s[!]e[!]r[!]s[!] [!]─[!]─[!]<[!] [!]h[!]a[!]s[!]i[!]l[!]_[!]k[!]u[!]i[!]s[!] [!]>[!]─[!]─[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!] [!] [!]([!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]p[!]u[!]n[!]y[!]a[!] [!]r[!]i[!]w[!]a[!]y[!]a[!]t[!] [!]k[!]u[!]i[!]s[!])[!][!]
+[!]k[!]e[!]l[!]a[!]s[!] [!]─[!]─[!]<[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!] [!] [!] [!] [!] [!] [!] [!] [!]([!]1[!] [!]k[!]e[!]l[!]a[!]s[!] [!]p[!]u[!]n[!]y[!]a[!] [!]b[!]a[!]n[!]y[!]a[!]k[!] [!]m[!]a[!]t[!]e[!]r[!]i[!])[!][!]
+[!]m[!]a[!]t[!]e[!]r[!]i[!] [!]─[!]─[!]<[!] [!]k[!]u[!]i[!]s[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]([!]1[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]q[!]u[!]i[!]z[!] [!]p[!]u[!]n[!]y[!]a[!] [!]b[!]a[!]n[!]y[!]a[!]k[!] [!]s[!]o[!]a[!]l[!])[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!] [!]3[!].[!]4[!] [!]D[!]e[!]s[!]a[!]i[!]n[!] [!]R[!]E[!]S[!]T[!] [!]A[!]P[!]I[!][!]
+[!][!]
+[!]R[!]E[!]S[!]T[!] [!]A[!]P[!]I[!] [!]d[!]i[!]b[!]a[!]n[!]g[!]u[!]n[!] [!]d[!]i[!] [!]a[!]t[!]a[!]s[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]*[!]*[!]1[!]2[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]d[!]i[!]k[!]e[!]l[!]o[!]m[!]p[!]o[!]k[!]k[!]a[!]n[!] [!]d[!]a[!]l[!]a[!]m[!] [!]4[!] [!]a[!]r[!]e[!]a[!]:[!][!]
+[!][!]
+[!]|[!] [!]G[!]r[!]u[!]p[!] [!]|[!] [!]E[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!] [!]|[!] [!]M[!]e[!]t[!]h[!]o[!]d[!] [!]|[!] [!]A[!]u[!]t[!]h[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]*[!]*[!]A[!]u[!]t[!]h[!]*[!]*[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]l[!]o[!]g[!]i[!]n[!]`[!] [!]|[!] [!]P[!]O[!]S[!]T[!] [!]|[!] [!]T[!]i[!]d[!]a[!]k[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]r[!]e[!]g[!]i[!]s[!]t[!]e[!]r[!]`[!] [!]|[!] [!]P[!]O[!]S[!]T[!] [!]|[!] [!]T[!]i[!]d[!]a[!]k[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]l[!]o[!]g[!]o[!]u[!]t[!]`[!] [!]|[!] [!]P[!]O[!]S[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]m[!]e[!]`[!] [!]|[!] [!]G[!]E[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!]*[!]*[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]d[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!]`[!] [!]|[!] [!]G[!]E[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]K[!]e[!]l[!]a[!]s[!]*[!]*[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]k[!]e[!]l[!]a[!]s[!]`[!] [!]|[!] [!]G[!]E[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]k[!]e[!]l[!]a[!]s[!]-[!]s[!]a[!]y[!]a[!]`[!] [!]|[!] [!]G[!]E[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]k[!]e[!]l[!]a[!]s[!]/[!]{[!]i[!]d[!]}[!]`[!] [!]|[!] [!]G[!]E[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]k[!]e[!]l[!]a[!]s[!]/[!]{[!]i[!]d[!]}[!]/[!]e[!]n[!]r[!]o[!]l[!]l[!]`[!] [!]|[!] [!]P[!]O[!]S[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]M[!]a[!]t[!]e[!]r[!]i[!]*[!]*[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]m[!]a[!]t[!]e[!]r[!]i[!]/[!]{[!]i[!]d[!]}[!]`[!] [!]|[!] [!]G[!]E[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]m[!]a[!]t[!]e[!]r[!]i[!]/[!]{[!]i[!]d[!]}[!]/[!]c[!]o[!]m[!]p[!]l[!]e[!]t[!]e[!]`[!] [!]|[!] [!]P[!]O[!]S[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]`[!]/[!]a[!]p[!]i[!]/[!]m[!]a[!]t[!]e[!]r[!]i[!]/[!]{[!]i[!]d[!]}[!]/[!]s[!]u[!]b[!]m[!]i[!]t[!]-[!]q[!]u[!]i[!]z[!]`[!] [!]|[!] [!]P[!]O[!]S[!]T[!] [!]|[!] [!]Y[!]a[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!] [!]3[!].[!]5[!] [!]D[!]e[!]s[!]a[!]i[!]n[!] [!]A[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!][!]
+[!][!]
+[!]A[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]t[!]e[!]r[!]d[!]i[!]r[!]i[!] [!]d[!]a[!]r[!]i[!] [!]*[!]*[!]5[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]i[!]e[!]s[!]*[!]*[!],[!] [!]*[!]*[!]2[!] [!]A[!]d[!]a[!]p[!]t[!]e[!]r[!]s[!]*[!]*[!],[!] [!]d[!]a[!]n[!] [!]*[!]*[!]3[!] [!]H[!]e[!]l[!]p[!]e[!]r[!] [!]C[!]l[!]a[!]s[!]s[!]e[!]s[!]*[!]*[!]:[!][!]
+[!][!]
+[!]|[!] [!]K[!]o[!]m[!]p[!]o[!]n[!]e[!]n[!] [!]|[!] [!]F[!]i[!]l[!]e[!] [!]|[!] [!]F[!]u[!]n[!]g[!]s[!]i[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]|[!] [!]`[!]L[!]o[!]g[!]i[!]n[!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]F[!]o[!]r[!]m[!] [!]l[!]o[!]g[!]i[!]n[!],[!] [!]v[!]a[!]l[!]i[!]d[!]a[!]s[!]i[!],[!] [!]s[!]i[!]m[!]p[!]a[!]n[!] [!]s[!]e[!]s[!]i[!] [!]|[!][!]
+[!]|[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]|[!] [!]`[!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]R[!]i[!]n[!]g[!]k[!]a[!]s[!]a[!]n[!] [!]k[!]e[!]l[!]a[!]s[!] [!]&[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!],[!] [!]l[!]o[!]g[!]o[!]u[!]t[!] [!]|[!][!]
+[!]|[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]|[!] [!]`[!]B[!]r[!]o[!]w[!]s[!]e[!]K[!]e[!]l[!]a[!]s[!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]D[!]a[!]f[!]t[!]a[!]r[!] [!]s[!]e[!]m[!]u[!]a[!] [!]k[!]e[!]l[!]a[!]s[!] [!]d[!]a[!]r[!]i[!] [!]A[!]P[!]I[!] [!]|[!][!]
+[!]|[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]|[!] [!]`[!]D[!]e[!]t[!]a[!]i[!]l[!]K[!]e[!]l[!]a[!]s[!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]D[!]e[!]t[!]a[!]i[!]l[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]e[!]n[!]r[!]o[!]l[!]l[!],[!] [!]d[!]a[!]f[!]t[!]a[!]r[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]|[!][!]
+[!]|[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]|[!] [!]`[!]M[!]a[!]t[!]e[!]r[!]i[!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]K[!]o[!]n[!]t[!]e[!]n[!] [!]v[!]i[!]d[!]e[!]o[!]/[!]t[!]e[!]x[!]t[!]/[!]q[!]u[!]i[!]z[!],[!] [!]s[!]u[!]b[!]m[!]i[!]t[!] [!]|[!][!]
+[!]|[!] [!]A[!]d[!]a[!]p[!]t[!]e[!]r[!] [!]|[!] [!]`[!]K[!]e[!]l[!]a[!]s[!]A[!]d[!]a[!]p[!]t[!]e[!]r[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]R[!]e[!]c[!]y[!]c[!]l[!]e[!]r[!]V[!]i[!]e[!]w[!] [!]i[!]t[!]e[!]m[!] [!]k[!]e[!]l[!]a[!]s[!] [!]|[!][!]
+[!]|[!] [!]A[!]d[!]a[!]p[!]t[!]e[!]r[!] [!]|[!] [!]`[!]M[!]a[!]t[!]e[!]r[!]i[!]A[!]d[!]a[!]p[!]t[!]e[!]r[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]R[!]e[!]c[!]y[!]c[!]l[!]e[!]r[!]V[!]i[!]e[!]w[!] [!]i[!]t[!]e[!]m[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]|[!][!]
+[!]|[!] [!]H[!]e[!]l[!]p[!]e[!]r[!] [!]|[!] [!]`[!]A[!]p[!]i[!]C[!]l[!]i[!]e[!]n[!]t[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]K[!]o[!]n[!]f[!]i[!]g[!]u[!]r[!]a[!]s[!]i[!] [!]R[!]e[!]t[!]r[!]o[!]f[!]i[!]t[!] [!]+[!] [!]O[!]k[!]H[!]t[!]t[!]p[!] [!]i[!]n[!]t[!]e[!]r[!]c[!]e[!]p[!]t[!]o[!]r[!] [!]|[!][!]
+[!]|[!] [!]H[!]e[!]l[!]p[!]e[!]r[!] [!]|[!] [!]`[!]A[!]p[!]i[!]S[!]e[!]r[!]v[!]i[!]c[!]e[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]I[!]n[!]t[!]e[!]r[!]f[!]a[!]c[!]e[!] [!]d[!]e[!]f[!]i[!]n[!]i[!]s[!]i[!] [!]1[!]2[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!] [!]|[!][!]
+[!]|[!] [!]H[!]e[!]l[!]p[!]e[!]r[!] [!]|[!] [!]`[!]S[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]S[!]h[!]a[!]r[!]e[!]d[!]P[!]r[!]e[!]f[!]e[!]r[!]e[!]n[!]c[!]e[!]s[!] [!]u[!]n[!]t[!]u[!]k[!] [!]t[!]o[!]k[!]e[!]n[!] [!]&[!] [!]p[!]r[!]o[!]f[!]i[!]l[!] [!]|[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]B[!]A[!]B[!] [!]I[!]V[!] [!]—[!] [!]I[!]M[!]P[!]L[!]E[!]M[!]E[!]N[!]T[!]A[!]S[!]I[!] [!]D[!]A[!]N[!] [!]P[!]E[!]N[!]G[!]U[!]J[!]I[!]A[!]N[!][!]
+[!][!]
+[!]#[!]#[!] [!]4[!].[!]1[!] [!]L[!]i[!]n[!]g[!]k[!]u[!]n[!]g[!]a[!]n[!] [!]P[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!][!]
+[!][!]
+[!]|[!] [!]K[!]o[!]m[!]p[!]o[!]n[!]e[!]n[!] [!]|[!] [!]S[!]p[!]e[!]s[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]*[!]*[!]O[!]S[!]*[!]*[!] [!]|[!] [!]W[!]i[!]n[!]d[!]o[!]w[!]s[!] [!]1[!]1[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]W[!]e[!]b[!] [!]S[!]e[!]r[!]v[!]e[!]r[!]*[!]*[!] [!]|[!] [!]X[!]A[!]M[!]P[!]P[!] [!]([!]A[!]p[!]a[!]c[!]h[!]e[!] [!]2[!].[!]4[!] [!]+[!] [!]M[!]y[!]S[!]Q[!]L[!] [!]8[!].[!]0[!])[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]P[!]H[!]P[!]*[!]*[!] [!]|[!] [!]P[!]H[!]P[!] [!]8[!].[!]2[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]F[!]r[!]a[!]m[!]e[!]w[!]o[!]r[!]k[!]*[!]*[!] [!]|[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]I[!]D[!]E[!] [!]W[!]e[!]b[!]*[!]*[!] [!]|[!] [!]V[!]i[!]s[!]u[!]a[!]l[!] [!]S[!]t[!]u[!]d[!]i[!]o[!] [!]C[!]o[!]d[!]e[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]I[!]D[!]E[!] [!]M[!]o[!]b[!]i[!]l[!]e[!]*[!]*[!] [!]|[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]S[!]t[!]u[!]d[!]i[!]o[!] [!]L[!]a[!]d[!]y[!]b[!]u[!]g[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]J[!]a[!]v[!]a[!]*[!]*[!] [!]|[!] [!]J[!]D[!]K[!] [!]1[!]7[!] [!]([!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]S[!]t[!]u[!]d[!]i[!]o[!] [!]b[!]u[!]n[!]d[!]l[!]e[!]d[!] [!]J[!]B[!]R[!])[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]B[!]u[!]i[!]l[!]d[!] [!]T[!]o[!]o[!]l[!]*[!]*[!] [!]|[!] [!]G[!]r[!]a[!]d[!]l[!]e[!] [!]8[!].[!]4[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]S[!]D[!]K[!]*[!]*[!] [!]|[!] [!]A[!]P[!]I[!] [!]L[!]e[!]v[!]e[!]l[!] [!]3[!]4[!] [!]([!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]1[!]4[!])[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]M[!]i[!]n[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]*[!]*[!] [!]|[!] [!]A[!]P[!]I[!] [!]L[!]e[!]v[!]e[!]l[!] [!]2[!]4[!] [!]([!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]7[!].[!]0[!])[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!] [!]4[!].[!]2[!] [!]I[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!] [!]B[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]([!]L[!]a[!]r[!]a[!]v[!]e[!]l[!])[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]2[!].[!]1[!] [!]S[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]L[!]o[!]g[!]i[!]c[!][!]
+[!][!]
+[!]L[!]o[!]g[!]i[!]k[!]a[!] [!]i[!]n[!]t[!]i[!] [!]s[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]l[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]d[!]i[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]d[!]i[!] [!]`[!]M[!]a[!]t[!]e[!]r[!]i[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]:[!]:[!]s[!]h[!]o[!]w[!]([!])[!]`[!]:[!][!]
+[!][!]
+[!]`[!]`[!]`[!]p[!]h[!]p[!][!]
+[!]/[!]/[!] [!]C[!]e[!]k[!] [!]a[!]p[!]a[!]k[!]a[!]h[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]s[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!] [!]s[!]u[!]d[!]a[!]h[!] [!]s[!]e[!]l[!]e[!]s[!]a[!]i[!][!]
+[!]i[!]f[!] [!]([!]$[!]m[!]a[!]t[!]e[!]r[!]i[!]-[!]>[!]u[!]r[!]u[!]t[!]a[!]n[!] [!]>[!] [!]1[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!]$[!]m[!]a[!]t[!]e[!]r[!]i[!]S[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!] [!]=[!] [!]M[!]a[!]t[!]e[!]r[!]i[!]:[!]:[!]w[!]h[!]e[!]r[!]e[!]([!]'[!]k[!]e[!]l[!]a[!]s[!]_[!]i[!]d[!]'[!],[!] [!]$[!]m[!]a[!]t[!]e[!]r[!]i[!]-[!]>[!]k[!]e[!]l[!]a[!]s[!]_[!]i[!]d[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]-[!]>[!]w[!]h[!]e[!]r[!]e[!]([!]'[!]u[!]r[!]u[!]t[!]a[!]n[!]'[!],[!] [!]$[!]m[!]a[!]t[!]e[!]r[!]i[!]-[!]>[!]u[!]r[!]u[!]t[!]a[!]n[!] [!]-[!] [!]1[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]-[!]>[!]f[!]i[!]r[!]s[!]t[!]([!])[!];[!][!]
+[!][!]
+[!] [!] [!] [!] [!]$[!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]S[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!] [!]=[!] [!]P[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]:[!]:[!]w[!]h[!]e[!]r[!]e[!]([!]'[!]u[!]s[!]e[!]r[!]_[!]i[!]d[!]'[!],[!] [!]$[!]u[!]s[!]e[!]r[!]-[!]>[!]i[!]d[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]-[!]>[!]w[!]h[!]e[!]r[!]e[!]([!]'[!]m[!]a[!]t[!]e[!]r[!]i[!]_[!]i[!]d[!]'[!],[!] [!]$[!]m[!]a[!]t[!]e[!]r[!]i[!]S[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!]-[!]>[!]i[!]d[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]-[!]>[!]f[!]i[!]r[!]s[!]t[!]([!])[!];[!][!]
+[!][!]
+[!] [!] [!] [!] [!]i[!]f[!] [!]([!]![!]$[!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]S[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!] [!]|[!]|[!] [!]$[!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]S[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!]-[!]>[!]s[!]t[!]a[!]t[!]u[!]s[!] [!]![!]=[!]=[!] [!]'[!]c[!]o[!]m[!]p[!]l[!]e[!]t[!]e[!]d[!]'[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]e[!]t[!]u[!]r[!]n[!] [!]r[!]e[!]s[!]p[!]o[!]n[!]s[!]e[!]([!])[!]-[!]>[!]j[!]s[!]o[!]n[!]([!][[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]'[!]s[!]t[!]a[!]t[!]u[!]s[!]'[!] [!]=[!]>[!] [!]'[!]e[!]r[!]r[!]o[!]r[!]'[!],[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]'[!]m[!]e[!]s[!]s[!]a[!]g[!]e[!]'[!] [!]=[!]>[!] [!]'[!]S[!]e[!]l[!]e[!]s[!]a[!]i[!]k[!]a[!]n[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]s[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!] [!]t[!]e[!]r[!]l[!]e[!]b[!]i[!]h[!] [!]d[!]a[!]h[!]u[!]l[!]u[!].[!]'[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]][!],[!] [!]4[!]0[!]3[!])[!];[!][!]
+[!] [!] [!] [!] [!]}[!][!]
+[!]}[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]2[!].[!]2[!] [!]Q[!]u[!]i[!]z[!] [!]A[!]u[!]t[!]o[!]-[!]G[!]r[!]a[!]d[!]i[!]n[!]g[!] [!]L[!]o[!]g[!]i[!]c[!][!]
+[!][!]
+[!]`[!]`[!]`[!]p[!]h[!]p[!][!]
+[!]$[!]b[!]e[!]n[!]a[!]r[!] [!]=[!] [!]0[!];[!][!]
+[!]f[!]o[!]r[!]e[!]a[!]c[!]h[!] [!]([!]$[!]s[!]o[!]a[!]l[!]L[!]i[!]s[!]t[!] [!]a[!]s[!] [!]$[!]s[!]o[!]a[!]l[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!]$[!]u[!]s[!]e[!]r[!]J[!]a[!]w[!]a[!]b[!] [!]=[!] [!]$[!]j[!]a[!]w[!]a[!]b[!]a[!]n[!][[!]$[!]s[!]o[!]a[!]l[!]-[!]>[!]i[!]d[!]][!] [!]?[!]?[!] [!]n[!]u[!]l[!]l[!];[!][!]
+[!] [!] [!] [!] [!]$[!]i[!]s[!]B[!]e[!]n[!]a[!]r[!] [!]=[!] [!]([!]$[!]u[!]s[!]e[!]r[!]J[!]a[!]w[!]a[!]b[!] [!]=[!]=[!]=[!] [!]$[!]s[!]o[!]a[!]l[!]-[!]>[!]j[!]a[!]w[!]a[!]b[!]a[!]n[!]_[!]b[!]e[!]n[!]a[!]r[!])[!];[!][!]
+[!] [!] [!] [!] [!]i[!]f[!] [!]([!]$[!]i[!]s[!]B[!]e[!]n[!]a[!]r[!])[!] [!]$[!]b[!]e[!]n[!]a[!]r[!]+[!]+[!];[!][!]
+[!]}[!][!]
+[!][!]
+[!]$[!]n[!]i[!]l[!]a[!]i[!] [!]=[!] [!]$[!]t[!]o[!]t[!]a[!]l[!]S[!]o[!]a[!]l[!] [!]>[!] [!]0[!] [!]?[!] [!]r[!]o[!]u[!]n[!]d[!]([!]([!]$[!]b[!]e[!]n[!]a[!]r[!] [!]/[!] [!]$[!]t[!]o[!]t[!]a[!]l[!]S[!]o[!]a[!]l[!])[!] [!]*[!] [!]1[!]0[!]0[!])[!] [!]:[!] [!]0[!];[!][!]
+[!]$[!]l[!]u[!]l[!]u[!]s[!] [!]=[!] [!]$[!]n[!]i[!]l[!]a[!]i[!] [!]>[!]=[!] [!]7[!]0[!];[!] [!]/[!]/[!] [!]N[!]i[!]l[!]a[!]i[!] [!]m[!]i[!]n[!]i[!]m[!]u[!]m[!] [!]k[!]e[!]l[!]u[!]l[!]u[!]s[!]a[!]n[!][!]
+[!][!]
+[!]i[!]f[!] [!]([!]$[!]l[!]u[!]l[!]u[!]s[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!]P[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]:[!]:[!]u[!]p[!]d[!]a[!]t[!]e[!]O[!]r[!]C[!]r[!]e[!]a[!]t[!]e[!]([!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!][[!]'[!]u[!]s[!]e[!]r[!]_[!]i[!]d[!]'[!] [!]=[!]>[!] [!]$[!]u[!]s[!]e[!]r[!]-[!]>[!]i[!]d[!],[!] [!]'[!]m[!]a[!]t[!]e[!]r[!]i[!]_[!]i[!]d[!]'[!] [!]=[!]>[!] [!]$[!]i[!]d[!]][!],[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!][[!]'[!]s[!]t[!]a[!]t[!]u[!]s[!]'[!] [!]=[!]>[!] [!]'[!]c[!]o[!]m[!]p[!]l[!]e[!]t[!]e[!]d[!]'[!],[!] [!]'[!]t[!]a[!]n[!]g[!]g[!]a[!]l[!]_[!]s[!]e[!]l[!]e[!]s[!]a[!]i[!]'[!] [!]=[!]>[!] [!]n[!]o[!]w[!]([!])[!]][!][!]
+[!] [!] [!] [!] [!])[!];[!][!]
+[!]}[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]2[!].[!]3[!] [!]R[!]o[!]l[!]e[!]-[!]B[!]a[!]s[!]e[!]d[!] [!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!][!]
+[!][!]
+[!]`[!]`[!]`[!]p[!]h[!]p[!][!]
+[!]p[!]u[!]b[!]l[!]i[!]c[!] [!]f[!]u[!]n[!]c[!]t[!]i[!]o[!]n[!] [!]i[!]n[!]d[!]e[!]x[!]([!]R[!]e[!]q[!]u[!]e[!]s[!]t[!] [!]$[!]r[!]e[!]q[!]u[!]e[!]s[!]t[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!]$[!]u[!]s[!]e[!]r[!] [!]=[!] [!]$[!]r[!]e[!]q[!]u[!]e[!]s[!]t[!]-[!]>[!]u[!]s[!]e[!]r[!]([!])[!];[!][!]
+[!] [!] [!] [!] [!]i[!]f[!] [!]([!]$[!]u[!]s[!]e[!]r[!]-[!]>[!]r[!]o[!]l[!]e[!] [!]=[!]=[!]=[!] [!]'[!]d[!]o[!]s[!]e[!]n[!]'[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]/[!]/[!] [!]S[!]t[!]a[!]t[!]i[!]s[!]t[!]i[!]k[!] [!]d[!]o[!]s[!]e[!]n[!]:[!] [!]t[!]o[!]t[!]a[!]l[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]t[!]o[!]t[!]a[!]l[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]e[!]t[!]u[!]r[!]n[!] [!]$[!]t[!]h[!]i[!]s[!]-[!]>[!]d[!]o[!]s[!]e[!]n[!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!]([!]$[!]u[!]s[!]e[!]r[!])[!];[!][!]
+[!] [!] [!] [!] [!]}[!] [!]e[!]l[!]s[!]e[!] [!]{[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]/[!]/[!] [!]M[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!]:[!] [!]k[!]e[!]l[!]a[!]s[!] [!]e[!]n[!]r[!]o[!]l[!]l[!]e[!]d[!] [!]+[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]p[!]e[!]r[!] [!]k[!]e[!]l[!]a[!]s[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]e[!]t[!]u[!]r[!]n[!] [!]$[!]t[!]h[!]i[!]s[!]-[!]>[!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!]([!]$[!]u[!]s[!]e[!]r[!])[!];[!][!]
+[!] [!] [!] [!] [!]}[!][!]
+[!]}[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!] [!]4[!].[!]3[!] [!]I[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]3[!].[!]1[!] [!]R[!]e[!]t[!]r[!]o[!]f[!]i[!]t[!] [!]+[!] [!]O[!]k[!]H[!]t[!]t[!]p[!] [!]I[!]n[!]t[!]e[!]r[!]c[!]e[!]p[!]t[!]o[!]r[!][!]
+[!][!]
+[!]`[!]`[!]`[!]j[!]a[!]v[!]a[!][!]
+[!]/[!]/[!] [!]A[!]p[!]i[!]C[!]l[!]i[!]e[!]n[!]t[!].[!]j[!]a[!]v[!]a[!] [!]-[!] [!]M[!]e[!]n[!]y[!]i[!]s[!]i[!]p[!]k[!]a[!]n[!] [!]B[!]e[!]a[!]r[!]e[!]r[!] [!]T[!]o[!]k[!]e[!]n[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!][!]
+[!]h[!]t[!]t[!]p[!]C[!]l[!]i[!]e[!]n[!]t[!].[!]a[!]d[!]d[!]I[!]n[!]t[!]e[!]r[!]c[!]e[!]p[!]t[!]o[!]r[!]([!]n[!]e[!]w[!] [!]I[!]n[!]t[!]e[!]r[!]c[!]e[!]p[!]t[!]o[!]r[!]([!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!]@[!]O[!]v[!]e[!]r[!]r[!]i[!]d[!]e[!][!]
+[!] [!] [!] [!] [!]p[!]u[!]b[!]l[!]i[!]c[!] [!]R[!]e[!]s[!]p[!]o[!]n[!]s[!]e[!] [!]i[!]n[!]t[!]e[!]r[!]c[!]e[!]p[!]t[!]([!]C[!]h[!]a[!]i[!]n[!] [!]c[!]h[!]a[!]i[!]n[!])[!] [!]t[!]h[!]r[!]o[!]w[!]s[!] [!]I[!]O[!]E[!]x[!]c[!]e[!]p[!]t[!]i[!]o[!]n[!] [!]{[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]R[!]e[!]q[!]u[!]e[!]s[!]t[!] [!]r[!]e[!]q[!]u[!]e[!]s[!]t[!] [!]=[!] [!]c[!]h[!]a[!]i[!]n[!].[!]r[!]e[!]q[!]u[!]e[!]s[!]t[!]([!])[!].[!]n[!]e[!]w[!]B[!]u[!]i[!]l[!]d[!]e[!]r[!]([!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!].[!]h[!]e[!]a[!]d[!]e[!]r[!]([!]"[!]A[!]u[!]t[!]h[!]o[!]r[!]i[!]z[!]a[!]t[!]i[!]o[!]n[!]"[!],[!] [!]"[!]B[!]e[!]a[!]r[!]e[!]r[!] [!]"[!] [!]+[!] [!]t[!]o[!]k[!]e[!]n[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!].[!]h[!]e[!]a[!]d[!]e[!]r[!]([!]"[!]A[!]c[!]c[!]e[!]p[!]t[!]"[!],[!] [!]"[!]a[!]p[!]p[!]l[!]i[!]c[!]a[!]t[!]i[!]o[!]n[!]/[!]j[!]s[!]o[!]n[!]"[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!].[!]b[!]u[!]i[!]l[!]d[!]([!])[!];[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]e[!]t[!]u[!]r[!]n[!] [!]c[!]h[!]a[!]i[!]n[!].[!]p[!]r[!]o[!]c[!]e[!]e[!]d[!]([!]r[!]e[!]q[!]u[!]e[!]s[!]t[!])[!];[!][!]
+[!] [!] [!] [!] [!]}[!][!]
+[!]}[!])[!];[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]3[!].[!]2[!] [!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]W[!]e[!]b[!]V[!]i[!]e[!]w[!] [!]F[!]i[!]x[!] [!]([!]E[!]r[!]r[!]o[!]r[!] [!]1[!]5[!]3[!])[!][!]
+[!][!]
+[!]`[!]`[!]`[!]j[!]a[!]v[!]a[!][!]
+[!]/[!]/[!] [!]K[!]o[!]n[!]v[!]e[!]r[!]s[!]i[!] [!]U[!]R[!]L[!] [!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]k[!]e[!] [!]f[!]o[!]r[!]m[!]a[!]t[!] [!]e[!]m[!]b[!]e[!]d[!][!]
+[!]p[!]r[!]i[!]v[!]a[!]t[!]e[!] [!]S[!]t[!]r[!]i[!]n[!]g[!] [!]c[!]o[!]n[!]v[!]e[!]r[!]t[!]T[!]o[!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!]E[!]m[!]b[!]e[!]d[!]([!]S[!]t[!]r[!]i[!]n[!]g[!] [!]u[!]r[!]l[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!]i[!]f[!] [!]([!]u[!]r[!]l[!].[!]c[!]o[!]n[!]t[!]a[!]i[!]n[!]s[!]([!]"[!]y[!]o[!]u[!]t[!]u[!].[!]b[!]e[!]/[!]"[!])[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]S[!]t[!]r[!]i[!]n[!]g[!] [!]i[!]d[!] [!]=[!] [!]u[!]r[!]l[!].[!]s[!]u[!]b[!]s[!]t[!]r[!]i[!]n[!]g[!]([!]u[!]r[!]l[!].[!]l[!]a[!]s[!]t[!]I[!]n[!]d[!]e[!]x[!]O[!]f[!]([!]"[!]/[!]"[!])[!] [!]+[!] [!]1[!])[!];[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]e[!]t[!]u[!]r[!]n[!] [!]"[!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]w[!]w[!]w[!].[!]y[!]o[!]u[!]t[!]u[!]b[!]e[!].[!]c[!]o[!]m[!]/[!]e[!]m[!]b[!]e[!]d[!]/[!]"[!] [!]+[!] [!]i[!]d[!];[!][!]
+[!] [!] [!] [!] [!]}[!][!]
+[!] [!] [!] [!] [!]i[!]f[!] [!]([!]u[!]r[!]l[!].[!]c[!]o[!]n[!]t[!]a[!]i[!]n[!]s[!]([!]"[!]w[!]a[!]t[!]c[!]h[!]?[!]v[!]=[!]"[!])[!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]S[!]t[!]r[!]i[!]n[!]g[!] [!]i[!]d[!] [!]=[!] [!]u[!]r[!]l[!].[!]s[!]u[!]b[!]s[!]t[!]r[!]i[!]n[!]g[!]([!]u[!]r[!]l[!].[!]i[!]n[!]d[!]e[!]x[!]O[!]f[!]([!]"[!]w[!]a[!]t[!]c[!]h[!]?[!]v[!]=[!]"[!])[!] [!]+[!] [!]8[!])[!];[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]e[!]t[!]u[!]r[!]n[!] [!]"[!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]w[!]w[!]w[!].[!]y[!]o[!]u[!]t[!]u[!]b[!]e[!].[!]c[!]o[!]m[!]/[!]e[!]m[!]b[!]e[!]d[!]/[!]"[!] [!]+[!] [!]i[!]d[!];[!][!]
+[!] [!] [!] [!] [!]}[!][!]
+[!] [!] [!] [!] [!]r[!]e[!]t[!]u[!]r[!]n[!] [!]u[!]r[!]l[!];[!][!]
+[!]}[!][!]
+[!][!]
+[!]/[!]/[!] [!]G[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]l[!]o[!]a[!]d[!]D[!]a[!]t[!]a[!]W[!]i[!]t[!]h[!]B[!]a[!]s[!]e[!]U[!]R[!]L[!] [!]a[!]g[!]a[!]r[!] [!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]m[!]e[!]n[!]g[!]e[!]n[!]a[!]l[!]i[!] [!]o[!]r[!]i[!]g[!]i[!]n[!][!]
+[!]w[!]e[!]b[!]V[!]i[!]e[!]w[!].[!]l[!]o[!]a[!]d[!]D[!]a[!]t[!]a[!]W[!]i[!]t[!]h[!]B[!]a[!]s[!]e[!]U[!]R[!]L[!]([!]"[!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]w[!]w[!]w[!].[!]y[!]o[!]u[!]t[!]u[!]b[!]e[!].[!]c[!]o[!]m[!]"[!],[!] [!]h[!]t[!]m[!]l[!],[!] [!]"[!]t[!]e[!]x[!]t[!]/[!]h[!]t[!]m[!]l[!]"[!],[!] [!]"[!]U[!]T[!]F[!]-[!]8[!]"[!],[!] [!]n[!]u[!]l[!]l[!])[!];[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]3[!].[!]3[!] [!]Q[!]u[!]i[!]z[!] [!]S[!]u[!]b[!]m[!]i[!]s[!]s[!]i[!]o[!]n[!] [!]F[!]i[!]x[!][!]
+[!][!]
+[!]`[!]`[!]`[!]j[!]a[!]v[!]a[!][!]
+[!]/[!]/[!] [!]B[!]u[!]g[!] [!]f[!]i[!]x[!]:[!] [!]c[!]a[!]r[!]i[!] [!]R[!]a[!]d[!]i[!]o[!]B[!]u[!]t[!]t[!]o[!]n[!] [!]d[!]a[!]r[!]i[!] [!]R[!]a[!]d[!]i[!]o[!]G[!]r[!]o[!]u[!]p[!],[!] [!]b[!]u[!]k[!]a[!]n[!] [!]d[!]a[!]r[!]i[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]r[!]o[!]o[!]t[!][!]
+[!]R[!]a[!]d[!]i[!]o[!]B[!]u[!]t[!]t[!]o[!]n[!] [!]r[!]b[!] [!]=[!] [!]r[!]g[!].[!]f[!]i[!]n[!]d[!]V[!]i[!]e[!]w[!]B[!]y[!]I[!]d[!]([!]c[!]h[!]e[!]c[!]k[!]e[!]d[!]I[!]d[!])[!];[!] [!] [!]/[!]/[!] [!]Y[!]a[!] [!]B[!]e[!]n[!]a[!]r[!][!]
+[!]/[!]/[!] [!]R[!]a[!]d[!]i[!]o[!]B[!]u[!]t[!]t[!]o[!]n[!] [!]r[!]b[!] [!]=[!] [!]f[!]i[!]n[!]d[!]V[!]i[!]e[!]w[!]B[!]y[!]I[!]d[!]([!]c[!]h[!]e[!]c[!]k[!]e[!]d[!]I[!]d[!])[!];[!] [!] [!] [!]/[!]/[!] [!]T[!]i[!]d[!]a[!]k[!] [!]M[!]e[!]n[!]y[!]e[!]b[!]a[!]b[!]k[!]a[!]n[!] [!]N[!]u[!]l[!]l[!]P[!]o[!]i[!]n[!]t[!]e[!]r[!]E[!]x[!]c[!]e[!]p[!]t[!]i[!]o[!]n[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!] [!]4[!].[!]4[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]W[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]4[!].[!]1[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]B[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]—[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]([!]L[!]a[!]r[!]a[!]v[!]e[!]l[!])[!][!]
+[!][!]
+[!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]d[!]i[!]l[!]a[!]k[!]u[!]k[!]a[!]n[!] [!]p[!]a[!]d[!]a[!] [!]4[!] [!]c[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!] [!]A[!]P[!]I[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]b[!]a[!]s[!]i[!]s[!] [!]d[!]a[!]t[!]a[!] [!]S[!]Q[!]L[!]i[!]t[!]e[!] [!]i[!]n[!]-[!]m[!]e[!]m[!]o[!]r[!]y[!].[!][!]
+[!][!]
+[!]|[!] [!]N[!]o[!] [!]|[!] [!]F[!]i[!]l[!]e[!] [!]T[!]e[!]s[!]t[!] [!]|[!] [!]J[!]u[!]m[!]l[!]a[!]h[!] [!]T[!]C[!] [!]|[!] [!]C[!]a[!]k[!]u[!]p[!]a[!]n[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]1[!] [!]|[!] [!]`[!]A[!]u[!]t[!]h[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!].[!]p[!]h[!]p[!]`[!] [!]|[!] [!]1[!]3[!] [!]T[!]C[!] [!]|[!] [!]L[!]o[!]g[!]i[!]n[!] [!]s[!]u[!]k[!]s[!]e[!]s[!]/[!]g[!]a[!]g[!]a[!]l[!],[!] [!]r[!]e[!]g[!]i[!]s[!]t[!]r[!]a[!]s[!]i[!],[!] [!]l[!]o[!]g[!]o[!]u[!]t[!],[!] [!]v[!]a[!]l[!]i[!]d[!]a[!]s[!]i[!] [!]e[!]m[!]a[!]i[!]l[!] [!]|[!][!]
+[!]|[!] [!]2[!] [!]|[!] [!]`[!]K[!]e[!]l[!]a[!]s[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!].[!]p[!]h[!]p[!]`[!] [!]|[!] [!]1[!]1[!] [!]T[!]C[!] [!]|[!] [!]D[!]a[!]f[!]t[!]a[!]r[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]d[!]e[!]t[!]a[!]i[!]l[!],[!] [!]e[!]n[!]r[!]o[!]l[!]l[!],[!] [!]k[!]e[!]l[!]a[!]s[!]-[!]s[!]a[!]y[!]a[!],[!] [!]d[!]u[!]p[!]l[!]i[!]k[!]a[!]t[!] [!]e[!]n[!]r[!]o[!]l[!]l[!] [!]|[!][!]
+[!]|[!] [!]3[!] [!]|[!] [!]`[!]M[!]a[!]t[!]e[!]r[!]i[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!].[!]p[!]h[!]p[!]`[!] [!]|[!] [!]1[!]0[!] [!]T[!]C[!] [!]|[!] [!]S[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]l[!]o[!]c[!]k[!],[!] [!]c[!]o[!]m[!]p[!]l[!]e[!]t[!]e[!] [!]m[!]a[!]t[!]e[!]r[!]i[!],[!] [!]s[!]u[!]b[!]m[!]i[!]t[!] [!]q[!]u[!]i[!]z[!],[!] [!]b[!]a[!]t[!]a[!]s[!] [!]p[!]e[!]r[!]c[!]o[!]b[!]a[!]a[!]n[!] [!]|[!][!]
+[!]|[!] [!]4[!] [!]|[!] [!]`[!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!].[!]p[!]h[!]p[!]`[!] [!]|[!] [!]8[!] [!]T[!]C[!] [!]|[!] [!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!] [!]d[!]o[!]s[!]e[!]n[!] [!]v[!]s[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!],[!] [!]s[!]t[!]a[!]t[!]i[!]s[!]t[!]i[!]k[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]*[!]*[!]T[!]o[!]t[!]a[!]l[!]*[!]*[!] [!]|[!] [!]*[!]*[!]4[!]2[!] [!]T[!]C[!]*[!]*[!] [!]|[!] [!]|[!][!]
+[!][!]
+[!]*[!]*[!]C[!]o[!]n[!]t[!]o[!]h[!] [!]T[!]e[!]s[!]t[!] [!]C[!]a[!]s[!]e[!] [!]K[!]r[!]i[!]t[!]i[!]s[!]:[!]*[!]*[!][!]
+[!][!]
+[!]`[!]`[!]`[!]p[!]h[!]p[!][!]
+[!]/[!]/[!] [!]T[!]C[!]:[!] [!]S[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]—[!] [!]M[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]t[!]i[!]d[!]a[!]k[!] [!]b[!]i[!]s[!]a[!] [!]a[!]k[!]s[!]e[!]s[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]k[!]e[!]-[!]2[!] [!]s[!]e[!]b[!]e[!]l[!]u[!]m[!] [!]s[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]k[!]e[!]-[!]1[!][!]
+[!]p[!]u[!]b[!]l[!]i[!]c[!] [!]f[!]u[!]n[!]c[!]t[!]i[!]o[!]n[!] [!]t[!]e[!]s[!]t[!]_[!]m[!]a[!]t[!]e[!]r[!]i[!]_[!]k[!]e[!]d[!]u[!]a[!]_[!]t[!]e[!]r[!]k[!]u[!]n[!]c[!]i[!]_[!]j[!]i[!]k[!]a[!]_[!]p[!]e[!]r[!]t[!]a[!]m[!]a[!]_[!]b[!]e[!]l[!]u[!]m[!]_[!]s[!]e[!]l[!]e[!]s[!]a[!]i[!]([!])[!][!]
+[!]{[!][!]
+[!] [!] [!] [!] [!]$[!]r[!]e[!]s[!]p[!]o[!]n[!]s[!]e[!] [!]=[!] [!]$[!]t[!]h[!]i[!]s[!]-[!]>[!]a[!]c[!]t[!]i[!]n[!]g[!]A[!]s[!]([!]$[!]t[!]h[!]i[!]s[!]-[!]>[!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]-[!]>[!]g[!]e[!]t[!]J[!]s[!]o[!]n[!]([!]'[!]/[!]a[!]p[!]i[!]/[!]m[!]a[!]t[!]e[!]r[!]i[!]/[!]'[!] [!].[!] [!]$[!]t[!]h[!]i[!]s[!]-[!]>[!]m[!]a[!]t[!]e[!]r[!]i[!]2[!]-[!]>[!]i[!]d[!])[!];[!][!]
+[!][!]
+[!] [!] [!] [!] [!]$[!]r[!]e[!]s[!]p[!]o[!]n[!]s[!]e[!]-[!]>[!]a[!]s[!]s[!]e[!]r[!]t[!]S[!]t[!]a[!]t[!]u[!]s[!]([!]4[!]0[!]3[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]-[!]>[!]a[!]s[!]s[!]e[!]r[!]t[!]J[!]s[!]o[!]n[!]([!][[!]'[!]m[!]e[!]s[!]s[!]a[!]g[!]e[!]'[!] [!]=[!]>[!] [!]'[!]S[!]e[!]l[!]e[!]s[!]a[!]i[!]k[!]a[!]n[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]s[!]e[!]b[!]e[!]l[!]u[!]m[!]n[!]y[!]a[!] [!]t[!]e[!]r[!]l[!]e[!]b[!]i[!]h[!] [!]d[!]a[!]h[!]u[!]l[!]u[!].[!]'[!]][!])[!];[!][!]
+[!]}[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]*[!]*[!]H[!]a[!]s[!]i[!]l[!]:[!]*[!]*[!] [!]Y[!]a[!] [!]*[!]*[!]4[!]2[!]/[!]4[!]2[!] [!]T[!]e[!]s[!]t[!] [!]C[!]a[!]s[!]e[!]s[!] [!]P[!]A[!]S[!]S[!]E[!]D[!]*[!]*[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]4[!].[!]2[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]F[!]r[!]o[!]n[!]t[!]e[!]n[!]d[!] [!]—[!] [!]J[!]U[!]n[!]i[!]t[!] [!]4[!] [!]([!]A[!]n[!]d[!]r[!]o[!]i[!]d[!])[!][!]
+[!][!]
+[!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]d[!]i[!]l[!]a[!]k[!]u[!]k[!]a[!]n[!] [!]p[!]a[!]d[!]a[!] [!]k[!]o[!]m[!]p[!]o[!]n[!]e[!]n[!] [!]i[!]n[!]t[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]J[!]U[!]n[!]i[!]t[!] [!]4[!] [!]d[!]a[!]n[!] [!]R[!]o[!]b[!]o[!]l[!]e[!]c[!]t[!]r[!]i[!]c[!].[!][!]
+[!][!]
+[!]|[!] [!]N[!]o[!] [!]|[!] [!]F[!]i[!]l[!]e[!] [!]T[!]e[!]s[!]t[!] [!]|[!] [!]J[!]u[!]m[!]l[!]a[!]h[!] [!]T[!]C[!] [!]|[!] [!]C[!]a[!]k[!]u[!]p[!]a[!]n[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]1[!] [!]|[!] [!]`[!]S[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!]T[!]e[!]s[!]t[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]9[!] [!]T[!]C[!] [!]|[!] [!]s[!]a[!]v[!]e[!]T[!]o[!]k[!]e[!]n[!],[!] [!]g[!]e[!]t[!]T[!]o[!]k[!]e[!]n[!],[!] [!]s[!]a[!]v[!]e[!]U[!]s[!]e[!]r[!],[!] [!]i[!]s[!]L[!]o[!]g[!]g[!]e[!]d[!]I[!]n[!],[!] [!]l[!]o[!]g[!]o[!]u[!]t[!],[!] [!]o[!]v[!]e[!]r[!]w[!]r[!]i[!]t[!]e[!] [!]|[!][!]
+[!]|[!] [!]2[!] [!]|[!] [!]`[!]A[!]p[!]i[!]C[!]l[!]i[!]e[!]n[!]t[!]T[!]e[!]s[!]t[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]5[!] [!]T[!]C[!] [!]|[!] [!]S[!]e[!]r[!]v[!]i[!]c[!]e[!] [!]c[!]r[!]e[!]a[!]t[!]i[!]o[!]n[!],[!] [!]t[!]o[!]k[!]e[!]n[!] [!]i[!]n[!]j[!]e[!]c[!]t[!]i[!]o[!]n[!],[!] [!]n[!]u[!]l[!]l[!] [!]t[!]o[!]k[!]e[!]n[!] [!]h[!]a[!]n[!]d[!]l[!]i[!]n[!]g[!] [!]|[!][!]
+[!]|[!] [!]3[!] [!]|[!] [!]`[!]K[!]e[!]l[!]a[!]s[!]A[!]d[!]a[!]p[!]t[!]e[!]r[!]T[!]e[!]s[!]t[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]4[!] [!]T[!]C[!] [!]|[!] [!]g[!]e[!]t[!]I[!]t[!]e[!]m[!]C[!]o[!]u[!]n[!]t[!],[!] [!]e[!]m[!]p[!]t[!]y[!] [!]l[!]i[!]s[!]t[!],[!] [!]f[!]i[!]e[!]l[!]d[!] [!]m[!]a[!]p[!]p[!]i[!]n[!]g[!],[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]|[!][!]
+[!]|[!] [!]4[!] [!]|[!] [!]`[!]M[!]a[!]t[!]e[!]r[!]i[!]A[!]d[!]a[!]p[!]t[!]e[!]r[!]T[!]e[!]s[!]t[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]6[!] [!]T[!]C[!] [!]|[!] [!]g[!]e[!]t[!]I[!]t[!]e[!]m[!]C[!]o[!]u[!]n[!]t[!],[!] [!]t[!]i[!]p[!]e[!] [!]i[!]c[!]o[!]n[!] [!]m[!]a[!]p[!]p[!]i[!]n[!]g[!],[!] [!]e[!]n[!]r[!]o[!]l[!]l[!]m[!]e[!]n[!]t[!] [!]f[!]l[!]a[!]g[!] [!]|[!][!]
+[!]|[!] [!]5[!] [!]|[!] [!]`[!]I[!]n[!]p[!]u[!]t[!]V[!]a[!]l[!]i[!]d[!]a[!]t[!]i[!]o[!]n[!]T[!]e[!]s[!]t[!].[!]j[!]a[!]v[!]a[!]`[!] [!]|[!] [!]8[!] [!]T[!]C[!] [!]|[!] [!]E[!]m[!]a[!]i[!]l[!] [!]f[!]o[!]r[!]m[!]a[!]t[!],[!] [!]p[!]a[!]s[!]s[!]w[!]o[!]r[!]d[!] [!]k[!]o[!]s[!]o[!]n[!]g[!],[!] [!]J[!]S[!]O[!]N[!] [!]b[!]o[!]d[!]y[!],[!] [!]B[!]e[!]a[!]r[!]e[!]r[!] [!]t[!]o[!]k[!]e[!]n[!] [!]|[!][!]
+[!]|[!] [!]|[!] [!]*[!]*[!]T[!]o[!]t[!]a[!]l[!]*[!]*[!] [!]|[!] [!]*[!]*[!]3[!]2[!] [!]T[!]C[!]*[!]*[!] [!]|[!] [!]|[!][!]
+[!][!]
+[!]*[!]*[!]C[!]o[!]n[!]t[!]o[!]h[!] [!]T[!]e[!]s[!]t[!] [!]C[!]a[!]s[!]e[!] [!]K[!]r[!]i[!]t[!]i[!]s[!]:[!]*[!]*[!][!]
+[!][!]
+[!]`[!]`[!]`[!]j[!]a[!]v[!]a[!][!]
+[!]/[!]/[!] [!]T[!]C[!]:[!] [!]L[!]o[!]g[!]o[!]u[!]t[!] [!]h[!]a[!]r[!]u[!]s[!] [!]m[!]e[!]n[!]g[!]h[!]a[!]p[!]u[!]s[!] [!]s[!]e[!]m[!]u[!]a[!] [!]d[!]a[!]t[!]a[!] [!]s[!]e[!]s[!]s[!]i[!]o[!]n[!][!]
+[!]@[!]T[!]e[!]s[!]t[!][!]
+[!]p[!]u[!]b[!]l[!]i[!]c[!] [!]v[!]o[!]i[!]d[!] [!]t[!]e[!]s[!]t[!]_[!]l[!]o[!]g[!]o[!]u[!]t[!]_[!]h[!]a[!]p[!]u[!]s[!]_[!]s[!]e[!]m[!]u[!]a[!]_[!]d[!]a[!]t[!]a[!]([!])[!] [!]{[!][!]
+[!] [!] [!] [!] [!]s[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]s[!]a[!]v[!]e[!]T[!]o[!]k[!]e[!]n[!]([!]"[!]t[!]e[!]s[!]t[!]_[!]t[!]o[!]k[!]e[!]n[!]"[!])[!];[!][!]
+[!] [!] [!] [!] [!]s[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]s[!]a[!]v[!]e[!]U[!]s[!]e[!]r[!]([!]1[!],[!] [!]"[!]U[!]s[!]e[!]r[!]"[!],[!] [!]"[!]u[!]s[!]e[!]r[!]@[!]t[!]e[!]s[!]t[!].[!]c[!]o[!]m[!]"[!],[!] [!]"[!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!]"[!])[!];[!][!]
+[!] [!] [!] [!] [!]a[!]s[!]s[!]e[!]r[!]t[!]T[!]r[!]u[!]e[!]([!]s[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]i[!]s[!]L[!]o[!]g[!]g[!]e[!]d[!]I[!]n[!]([!])[!])[!];[!][!]
+[!][!]
+[!] [!] [!] [!] [!]s[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]l[!]o[!]g[!]o[!]u[!]t[!]([!])[!];[!][!]
+[!][!]
+[!] [!] [!] [!] [!]a[!]s[!]s[!]e[!]r[!]t[!]F[!]a[!]l[!]s[!]e[!]([!]s[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]i[!]s[!]L[!]o[!]g[!]g[!]e[!]d[!]I[!]n[!]([!])[!])[!];[!][!]
+[!] [!] [!] [!] [!]a[!]s[!]s[!]e[!]r[!]t[!]N[!]u[!]l[!]l[!]([!]s[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]g[!]e[!]t[!]T[!]o[!]k[!]e[!]n[!]([!])[!])[!];[!][!]
+[!] [!] [!] [!] [!]a[!]s[!]s[!]e[!]r[!]t[!]E[!]q[!]u[!]a[!]l[!]s[!]([!]"[!]"[!],[!] [!]s[!]e[!]s[!]s[!]i[!]o[!]n[!]M[!]a[!]n[!]a[!]g[!]e[!]r[!].[!]g[!]e[!]t[!]U[!]s[!]e[!]r[!]N[!]a[!]m[!]e[!]([!])[!])[!];[!][!]
+[!]}[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]*[!]*[!]H[!]a[!]s[!]i[!]l[!]:[!]*[!]*[!] [!]Y[!]a[!] [!]*[!]*[!]3[!]2[!]/[!]3[!]2[!] [!]T[!]e[!]s[!]t[!] [!]C[!]a[!]s[!]e[!]s[!] [!]P[!]A[!]S[!]S[!]E[!]D[!] [!]—[!] [!]B[!]U[!]I[!]L[!]D[!] [!]S[!]U[!]C[!]C[!]E[!]S[!]S[!]F[!]U[!]L[!]*[!]*[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]4[!].[!]3[!] [!]R[!]e[!]k[!]a[!]p[!] [!]T[!]o[!]t[!]a[!]l[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!][!]
+[!][!]
+[!]|[!] [!]P[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]|[!] [!]J[!]u[!]m[!]l[!]a[!]h[!] [!]T[!]C[!] [!]|[!] [!]P[!]a[!]s[!]s[!]e[!]d[!] [!]|[!] [!]F[!]a[!]i[!]l[!]e[!]d[!] [!]|[!] [!]S[!]t[!]a[!]t[!]u[!]s[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]A[!]P[!]I[!] [!]([!]P[!]H[!]P[!]U[!]n[!]i[!]t[!])[!] [!]|[!] [!]4[!]2[!] [!]|[!] [!]4[!]2[!] [!]|[!] [!]0[!] [!]|[!] [!]Y[!]a[!] [!]P[!]A[!]S[!]S[!]E[!]D[!] [!]|[!][!]
+[!]|[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]([!]J[!]U[!]n[!]i[!]t[!] [!]4[!])[!] [!]|[!] [!]3[!]2[!] [!]|[!] [!]3[!]2[!] [!]|[!] [!]0[!] [!]|[!] [!]Y[!]a[!] [!]P[!]A[!]S[!]S[!]E[!]D[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]T[!]o[!]t[!]a[!]l[!]*[!]*[!] [!]|[!] [!]*[!]*[!]7[!]4[!]*[!]*[!] [!]|[!] [!]*[!]*[!]7[!]4[!]*[!]*[!] [!]|[!] [!]*[!]*[!]0[!]*[!]*[!] [!]|[!] [!]Y[!]a[!] [!]*[!]*[!]A[!]L[!]L[!] [!]P[!]A[!]S[!]S[!]E[!]D[!]*[!]*[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!] [!]4[!].[!]5[!] [!]B[!]u[!]g[!] [!]y[!]a[!]n[!]g[!] [!]D[!]i[!]t[!]e[!]m[!]u[!]k[!]a[!]n[!] [!]d[!]a[!]n[!] [!]D[!]i[!]p[!]e[!]r[!]b[!]a[!]i[!]k[!]i[!][!]
+[!][!]
+[!]|[!] [!]N[!]o[!] [!]|[!] [!]B[!]u[!]g[!] [!]|[!] [!]P[!]e[!]n[!]y[!]e[!]b[!]a[!]b[!] [!]|[!] [!]S[!]o[!]l[!]u[!]s[!]i[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]1[!] [!]|[!] [!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]E[!]r[!]r[!]o[!]r[!] [!]1[!]5[!]3[!] [!]d[!]i[!] [!]W[!]e[!]b[!]V[!]i[!]e[!]w[!] [!]|[!] [!]`[!]l[!]o[!]a[!]d[!]D[!]a[!]t[!]a[!]([!])[!]`[!] [!]t[!]i[!]d[!]a[!]k[!] [!]s[!]e[!]t[!] [!]`[!]b[!]a[!]s[!]e[!]U[!]r[!]l[!]`[!],[!] [!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]m[!]e[!]n[!]o[!]l[!]a[!]k[!] [!]r[!]e[!]q[!]u[!]e[!]s[!]t[!] [!]k[!]a[!]r[!]e[!]n[!]a[!] [!]o[!]r[!]i[!]g[!]i[!]n[!] [!]k[!]o[!]s[!]o[!]n[!]g[!] [!]|[!] [!]G[!]a[!]n[!]t[!]i[!] [!]k[!]e[!] [!]`[!]l[!]o[!]a[!]d[!]D[!]a[!]t[!]a[!]W[!]i[!]t[!]h[!]B[!]a[!]s[!]e[!]U[!]R[!]L[!]([!]"[!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]w[!]w[!]w[!].[!]y[!]o[!]u[!]t[!]u[!]b[!]e[!].[!]c[!]o[!]m[!]"[!],[!] [!].[!].[!].[!])[!]`[!] [!]d[!]a[!]n[!] [!]t[!]a[!]m[!]b[!]a[!]h[!] [!]`[!]W[!]e[!]b[!]C[!]h[!]r[!]o[!]m[!]e[!]C[!]l[!]i[!]e[!]n[!]t[!]`[!] [!]|[!][!]
+[!]|[!] [!]2[!] [!]|[!] [!]G[!]a[!]g[!]a[!]l[!] [!]s[!]u[!]b[!]m[!]i[!]t[!] [!]q[!]u[!]i[!]z[!] [!]([!]s[!]i[!]l[!]e[!]n[!]t[!] [!]c[!]r[!]a[!]s[!]h[!])[!] [!]|[!] [!]`[!]f[!]i[!]n[!]d[!]V[!]i[!]e[!]w[!]B[!]y[!]I[!]d[!]([!]c[!]h[!]e[!]c[!]k[!]e[!]d[!]I[!]d[!])[!]`[!] [!]m[!]e[!]n[!]c[!]a[!]r[!]i[!] [!]R[!]a[!]d[!]i[!]o[!]B[!]u[!]t[!]t[!]o[!]n[!] [!]d[!]a[!]r[!]i[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]r[!]o[!]o[!]t[!],[!] [!]b[!]u[!]k[!]a[!]n[!] [!]d[!]a[!]r[!]i[!] [!]R[!]a[!]d[!]i[!]o[!]G[!]r[!]o[!]u[!]p[!] [!]→[!] [!]N[!]u[!]l[!]l[!]P[!]o[!]i[!]n[!]t[!]e[!]r[!]E[!]x[!]c[!]e[!]p[!]t[!]i[!]o[!]n[!] [!]|[!] [!]G[!]a[!]n[!]t[!]i[!] [!]k[!]e[!] [!]`[!]r[!]g[!].[!]f[!]i[!]n[!]d[!]V[!]i[!]e[!]w[!]B[!]y[!]I[!]d[!]([!]c[!]h[!]e[!]c[!]k[!]e[!]d[!]I[!]d[!])[!]`[!] [!]|[!][!]
+[!]|[!] [!]3[!] [!]|[!] [!]F[!]i[!]e[!]l[!]d[!] [!]`[!]s[!]e[!]l[!]e[!]s[!]a[!]i[!]`[!] [!]s[!]e[!]l[!]a[!]l[!]u[!] [!]`[!]f[!]a[!]l[!]s[!]e[!]`[!] [!]|[!] [!]`[!]K[!]e[!]l[!]a[!]s[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]`[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]k[!]o[!]l[!]o[!]m[!] [!]`[!]s[!]e[!]l[!]e[!]s[!]a[!]i[!]`[!] [!]y[!]a[!]n[!]g[!] [!]t[!]i[!]d[!]a[!]k[!] [!]a[!]d[!]a[!],[!] [!]s[!]e[!]h[!]a[!]r[!]u[!]s[!]n[!]y[!]a[!] [!]`[!]s[!]t[!]a[!]t[!]u[!]s[!] [!]=[!]=[!]=[!] [!]'[!]c[!]o[!]m[!]p[!]l[!]e[!]t[!]e[!]d[!]'[!]`[!] [!]|[!] [!]P[!]e[!]r[!]b[!]a[!]i[!]k[!]i[!] [!]k[!]o[!]n[!]d[!]i[!]s[!]i[!] [!]c[!]e[!]k[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]k[!]e[!] [!]`[!]$[!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]-[!]>[!]s[!]t[!]a[!]t[!]u[!]s[!] [!]=[!]=[!]=[!] [!]'[!]c[!]o[!]m[!]p[!]l[!]e[!]t[!]e[!]d[!]'[!]`[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!] [!]4[!].[!]6[!] [!]R[!]e[!]n[!]c[!]a[!]n[!]a[!] [!]P[!]e[!]n[!]e[!]r[!]a[!]p[!]a[!]n[!] [!]P[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!] [!]C[!]I[!]/[!]C[!]D[!][!]
+[!][!]
+[!]*[!]C[!]o[!]n[!]t[!]i[!]n[!]u[!]o[!]u[!]s[!] [!]I[!]n[!]t[!]e[!]g[!]r[!]a[!]t[!]i[!]o[!]n[!] [!]/[!] [!]C[!]o[!]n[!]t[!]i[!]n[!]u[!]o[!]u[!]s[!] [!]D[!]e[!]p[!]l[!]o[!]y[!]m[!]e[!]n[!]t[!]*[!] [!]([!]C[!]I[!]/[!]C[!]D[!])[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]p[!]r[!]a[!]k[!]t[!]i[!]k[!] [!]o[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]d[!]a[!]l[!]a[!]m[!] [!]p[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]p[!]e[!]r[!]a[!]n[!]g[!]k[!]a[!]t[!] [!]l[!]u[!]n[!]a[!]k[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]m[!]u[!]n[!]g[!]k[!]i[!]n[!]k[!]a[!]n[!] [!]p[!]r[!]o[!]s[!]e[!]s[!] [!]b[!]u[!]i[!]l[!]d[!],[!] [!]t[!]e[!]s[!]t[!],[!] [!]d[!]a[!]n[!] [!]d[!]e[!]p[!]l[!]o[!]y[!] [!]b[!]e[!]r[!]j[!]a[!]l[!]a[!]n[!] [!]s[!]e[!]c[!]a[!]r[!]a[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!] [!]s[!]e[!]t[!]i[!]a[!]p[!] [!]k[!]a[!]l[!]i[!] [!]a[!]d[!]a[!] [!]p[!]e[!]r[!]u[!]b[!]a[!]h[!]a[!]n[!] [!]k[!]o[!]d[!]e[!] [!]y[!]a[!]n[!]g[!] [!]d[!]i[!]-[!]p[!]u[!]s[!]h[!] [!]k[!]e[!] [!]r[!]e[!]p[!]o[!]s[!]i[!]t[!]o[!]r[!]y[!].[!][!]
+[!][!]
+[!]K[!]a[!]r[!]e[!]n[!]a[!] [!]p[!]r[!]o[!]y[!]e[!]k[!] [!]i[!]n[!]i[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]*[!]*[!]G[!]i[!]t[!]H[!]u[!]b[!]*[!]*[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]v[!]e[!]r[!]s[!]i[!]o[!]n[!] [!]c[!]o[!]n[!]t[!]r[!]o[!]l[!],[!] [!]r[!]e[!]n[!]c[!]a[!]n[!]a[!] [!]C[!]I[!]/[!]C[!]D[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]*[!]*[!]G[!]i[!]t[!]H[!]u[!]b[!] [!]A[!]c[!]t[!]i[!]o[!]n[!]s[!]*[!]*[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]a[!]l[!]a[!]t[!] [!]o[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]p[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!].[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]6[!].[!]1[!] [!]T[!]u[!]j[!]u[!]a[!]n[!] [!]P[!]e[!]n[!]e[!]r[!]a[!]p[!]a[!]n[!] [!]C[!]I[!]/[!]C[!]D[!][!]
+[!][!]
+[!]|[!] [!]T[!]u[!]j[!]u[!]a[!]n[!] [!]|[!] [!]P[!]e[!]n[!]j[!]e[!]l[!]a[!]s[!]a[!]n[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]*[!]*[!]O[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]T[!]e[!]s[!]t[!]i[!]n[!]g[!]*[!]*[!] [!]|[!] [!]S[!]e[!]t[!]i[!]a[!]p[!] [!]p[!]u[!]s[!]h[!] [!]k[!]e[!] [!]b[!]r[!]a[!]n[!]c[!]h[!] [!]`[!]m[!]a[!]s[!]t[!]e[!]r[!]`[!] [!]a[!]k[!]a[!]n[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!] [!]m[!]e[!]n[!]j[!]a[!]l[!]a[!]n[!]k[!]a[!]n[!] [!]7[!]4[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!] [!]([!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]+[!] [!]J[!]U[!]n[!]i[!]t[!])[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]D[!]e[!]t[!]e[!]k[!]s[!]i[!] [!]B[!]u[!]g[!] [!]D[!]i[!]n[!]i[!]*[!]*[!] [!]|[!] [!]P[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!] [!]a[!]k[!]a[!]n[!] [!]g[!]a[!]g[!]a[!]l[!] [!]d[!]a[!]n[!] [!]m[!]e[!]m[!]b[!]e[!]r[!]i[!] [!]n[!]o[!]t[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!] [!]j[!]i[!]k[!]a[!] [!]a[!]d[!]a[!] [!]t[!]e[!]s[!]t[!] [!]y[!]a[!]n[!]g[!] [!]t[!]i[!]d[!]a[!]k[!] [!]l[!]u[!]l[!]u[!]s[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]O[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]B[!]u[!]i[!]l[!]d[!] [!]A[!]P[!]K[!]*[!]*[!] [!]|[!] [!]S[!]e[!]t[!]i[!]a[!]p[!] [!]r[!]i[!]l[!]i[!]s[!] [!]b[!]a[!]r[!]u[!] [!]a[!]k[!]a[!]n[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!] [!]b[!]u[!]i[!]l[!]d[!] [!]f[!]i[!]l[!]e[!] [!]`[!]a[!]p[!]p[!]-[!]d[!]e[!]b[!]u[!]g[!].[!]a[!]p[!]k[!]`[!] [!]t[!]a[!]n[!]p[!]a[!] [!]i[!]n[!]t[!]e[!]r[!]v[!]e[!]n[!]s[!]i[!] [!]m[!]a[!]n[!]u[!]a[!]l[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]D[!]e[!]p[!]l[!]o[!]y[!]m[!]e[!]n[!]t[!] [!]O[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!]*[!]*[!] [!]|[!] [!]J[!]i[!]k[!]a[!] [!]s[!]e[!]m[!]u[!]a[!] [!]t[!]e[!]s[!]t[!] [!]l[!]u[!]l[!]u[!]s[!],[!] [!]k[!]o[!]d[!]e[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!] [!]d[!]i[!]-[!]d[!]e[!]p[!]l[!]o[!]y[!] [!]k[!]e[!] [!]s[!]e[!]r[!]v[!]e[!]r[!] [!]s[!]t[!]a[!]g[!]i[!]n[!]g[!]/[!]p[!]r[!]o[!]d[!]u[!]k[!]s[!]i[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]6[!].[!]2[!] [!]T[!]a[!]h[!]a[!]p[!]a[!]n[!] [!]P[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!][!]
+[!][!]
+[!]`[!]`[!]`[!][!]
+[!]┌[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┐[!] [!] [!] [!] [!]┌[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┐[!] [!] [!] [!] [!]┌[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┐[!] [!] [!] [!] [!]┌[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┐[!][!]
+[!]│[!] [!] [!] [!]T[!]R[!]I[!]G[!]G[!]E[!]R[!] [!] [!] [!]│[!] [!]→[!] [!] [!]│[!] [!] [!] [!] [!]B[!]U[!]I[!]L[!]D[!] [!] [!] [!] [!]│[!] [!]→[!] [!] [!]│[!] [!] [!] [!] [!]T[!]E[!]S[!]T[!] [!] [!] [!] [!] [!]│[!] [!]→[!] [!] [!]│[!] [!] [!] [!]D[!]E[!]P[!]L[!]O[!]Y[!] [!] [!] [!] [!]│[!][!]
+[!]│[!] [!] [!]g[!]i[!]t[!] [!]p[!]u[!]s[!]h[!] [!] [!] [!]│[!] [!] [!] [!] [!]│[!] [!]c[!]o[!]m[!]p[!]o[!]s[!]e[!]r[!] [!] [!] [!] [!]│[!] [!] [!] [!] [!]│[!] [!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!] [!] [!] [!]│[!] [!] [!] [!] [!]│[!] [!]p[!]h[!]p[!] [!]a[!]r[!]t[!]i[!]s[!]a[!]n[!] [!]│[!][!]
+[!]│[!] [!] [!]k[!]e[!] [!]m[!]a[!]s[!]t[!]e[!]r[!] [!] [!]│[!] [!] [!] [!] [!]│[!] [!]g[!]r[!]a[!]d[!]l[!]e[!] [!] [!] [!] [!] [!] [!]│[!] [!] [!] [!] [!]│[!] [!] [!]J[!]U[!]n[!]i[!]t[!] [!] [!] [!] [!] [!] [!]│[!] [!] [!] [!] [!]│[!] [!]s[!]e[!]r[!]v[!]e[!]/[!]V[!]P[!]S[!] [!] [!] [!]│[!][!]
+[!]└[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┘[!] [!] [!] [!] [!]└[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┘[!] [!] [!] [!] [!]└[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┘[!] [!] [!] [!] [!]└[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]┘[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]|[!] [!]S[!]t[!]a[!]g[!]e[!] [!]|[!] [!]A[!]l[!]a[!]t[!] [!]|[!] [!]P[!]r[!]o[!]s[!]e[!]s[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]*[!]*[!]B[!]u[!]i[!]l[!]d[!]*[!]*[!] [!]|[!] [!]C[!]o[!]m[!]p[!]o[!]s[!]e[!]r[!],[!] [!]G[!]r[!]a[!]d[!]l[!]e[!] [!]|[!] [!]I[!]n[!]s[!]t[!]a[!]l[!]l[!] [!]d[!]e[!]p[!]e[!]n[!]d[!]e[!]n[!]c[!]i[!]e[!]s[!],[!] [!]c[!]o[!]m[!]p[!]i[!]l[!]e[!] [!]a[!]s[!]s[!]e[!]t[!]s[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]T[!]e[!]s[!]t[!]*[!]*[!] [!]|[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!],[!] [!]J[!]U[!]n[!]i[!]t[!] [!]4[!] [!]|[!] [!]J[!]a[!]l[!]a[!]n[!]k[!]a[!]n[!] [!]4[!]2[!] [!]+[!] [!]3[!]2[!] [!]=[!] [!]7[!]4[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]P[!]a[!]c[!]k[!]a[!]g[!]e[!]*[!]*[!] [!]|[!] [!]G[!]r[!]a[!]d[!]l[!]e[!] [!]a[!]s[!]s[!]e[!]m[!]b[!]l[!]e[!]D[!]e[!]b[!]u[!]g[!] [!]|[!] [!]B[!]u[!]i[!]l[!]d[!] [!]f[!]i[!]l[!]e[!] [!]A[!]P[!]K[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]|[!][!]
+[!]|[!] [!]*[!]*[!]D[!]e[!]p[!]l[!]o[!]y[!]*[!]*[!] [!]|[!] [!]S[!]S[!]H[!] [!]/[!] [!]A[!]r[!]t[!]i[!]s[!]a[!]n[!] [!]|[!] [!]M[!]i[!]g[!]r[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]D[!]B[!] [!]+[!] [!]r[!]e[!]s[!]t[!]a[!]r[!]t[!] [!]s[!]e[!]r[!]v[!]e[!]r[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]6[!].[!]3[!] [!]R[!]e[!]n[!]c[!]a[!]n[!]a[!] [!]K[!]o[!]n[!]f[!]i[!]g[!]u[!]r[!]a[!]s[!]i[!] [!]G[!]i[!]t[!]H[!]u[!]b[!] [!]A[!]c[!]t[!]i[!]o[!]n[!]s[!][!]
+[!][!]
+[!]B[!]e[!]r[!]i[!]k[!]u[!]t[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]r[!]a[!]n[!]c[!]a[!]n[!]g[!]a[!]n[!] [!]f[!]i[!]l[!]e[!] [!]k[!]o[!]n[!]f[!]i[!]g[!]u[!]r[!]a[!]s[!]i[!] [!]p[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!] [!]`[!].[!]g[!]i[!]t[!]h[!]u[!]b[!]/[!]w[!]o[!]r[!]k[!]f[!]l[!]o[!]w[!]s[!]/[!]c[!]i[!].[!]y[!]m[!]l[!]`[!] [!]y[!]a[!]n[!]g[!] [!]a[!]k[!]a[!]n[!] [!]d[!]i[!]b[!]u[!]a[!]t[!]:[!][!]
+[!][!]
+[!]`[!]`[!]`[!]y[!]a[!]m[!]l[!][!]
+[!]n[!]a[!]m[!]e[!]:[!] [!]J[!]o[!]u[!]r[!]n[!]e[!]y[!] [!]L[!]e[!]a[!]r[!]n[!] [!]L[!]M[!]S[!] [!]—[!] [!]C[!]I[!]/[!]C[!]D[!] [!]P[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!][!]
+[!][!]
+[!]o[!]n[!]:[!][!]
+[!] [!] [!]p[!]u[!]s[!]h[!]:[!][!]
+[!] [!] [!] [!] [!]b[!]r[!]a[!]n[!]c[!]h[!]e[!]s[!]:[!] [!][[!] [!]m[!]a[!]s[!]t[!]e[!]r[!] [!]][!][!]
+[!] [!] [!]p[!]u[!]l[!]l[!]_[!]r[!]e[!]q[!]u[!]e[!]s[!]t[!]:[!][!]
+[!] [!] [!] [!] [!]b[!]r[!]a[!]n[!]c[!]h[!]e[!]s[!]:[!] [!][[!] [!]m[!]a[!]s[!]t[!]e[!]r[!] [!]][!][!]
+[!][!]
+[!]j[!]o[!]b[!]s[!]:[!][!]
+[!] [!] [!]#[!] [!]─[!]─[!]─[!] [!]S[!]t[!]a[!]g[!]e[!] [!]1[!]:[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]B[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]T[!]e[!]s[!]t[!] [!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!][!]
+[!] [!] [!]l[!]a[!]r[!]a[!]v[!]e[!]l[!]-[!]t[!]e[!]s[!]t[!]:[!][!]
+[!] [!] [!] [!] [!]n[!]a[!]m[!]e[!]:[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]T[!]e[!]s[!]t[!]s[!][!]
+[!] [!] [!] [!] [!]r[!]u[!]n[!]s[!]-[!]o[!]n[!]:[!] [!]u[!]b[!]u[!]n[!]t[!]u[!]-[!]l[!]a[!]t[!]e[!]s[!]t[!][!]
+[!] [!] [!] [!] [!]s[!]t[!]e[!]p[!]s[!]:[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]u[!]s[!]e[!]s[!]:[!] [!]a[!]c[!]t[!]i[!]o[!]n[!]s[!]/[!]c[!]h[!]e[!]c[!]k[!]o[!]u[!]t[!]@[!]v[!]4[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]S[!]e[!]t[!]u[!]p[!] [!]P[!]H[!]P[!] [!]8[!].[!]2[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]u[!]s[!]e[!]s[!]:[!] [!]s[!]h[!]i[!]v[!]a[!]m[!]m[!]a[!]t[!]h[!]u[!]r[!]/[!]s[!]e[!]t[!]u[!]p[!]-[!]p[!]h[!]p[!]@[!]v[!]2[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]i[!]t[!]h[!]:[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]p[!]h[!]p[!]-[!]v[!]e[!]r[!]s[!]i[!]o[!]n[!]:[!] [!]'[!]8[!].[!]2[!]'[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]e[!]x[!]t[!]e[!]n[!]s[!]i[!]o[!]n[!]s[!]:[!] [!]m[!]b[!]s[!]t[!]r[!]i[!]n[!]g[!],[!] [!]p[!]d[!]o[!]_[!]s[!]q[!]l[!]i[!]t[!]e[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]I[!]n[!]s[!]t[!]a[!]l[!]l[!] [!]C[!]o[!]m[!]p[!]o[!]s[!]e[!]r[!] [!]D[!]e[!]p[!]e[!]n[!]d[!]e[!]n[!]c[!]i[!]e[!]s[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]u[!]n[!]:[!] [!]c[!]o[!]m[!]p[!]o[!]s[!]e[!]r[!] [!]i[!]n[!]s[!]t[!]a[!]l[!]l[!] [!]-[!]-[!]n[!]o[!]-[!]i[!]n[!]t[!]e[!]r[!]a[!]c[!]t[!]i[!]o[!]n[!] [!]-[!]-[!]p[!]r[!]e[!]f[!]e[!]r[!]-[!]d[!]i[!]s[!]t[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]o[!]r[!]k[!]i[!]n[!]g[!]-[!]d[!]i[!]r[!]e[!]c[!]t[!]o[!]r[!]y[!]:[!] [!].[!]/[!]L[!]M[!]S[!]-[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]C[!]o[!]p[!]y[!] [!].[!]e[!]n[!]v[!].[!]t[!]e[!]s[!]t[!]i[!]n[!]g[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]u[!]n[!]:[!] [!]c[!]p[!] [!].[!]e[!]n[!]v[!].[!]e[!]x[!]a[!]m[!]p[!]l[!]e[!] [!].[!]e[!]n[!]v[!].[!]t[!]e[!]s[!]t[!]i[!]n[!]g[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]o[!]r[!]k[!]i[!]n[!]g[!]-[!]d[!]i[!]r[!]e[!]c[!]t[!]o[!]r[!]y[!]:[!] [!].[!]/[!]L[!]M[!]S[!]-[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]G[!]e[!]n[!]e[!]r[!]a[!]t[!]e[!] [!]A[!]p[!]p[!] [!]K[!]e[!]y[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]u[!]n[!]:[!] [!]p[!]h[!]p[!] [!]a[!]r[!]t[!]i[!]s[!]a[!]n[!] [!]k[!]e[!]y[!]:[!]g[!]e[!]n[!]e[!]r[!]a[!]t[!]e[!] [!]-[!]-[!]e[!]n[!]v[!]=[!]t[!]e[!]s[!]t[!]i[!]n[!]g[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]o[!]r[!]k[!]i[!]n[!]g[!]-[!]d[!]i[!]r[!]e[!]c[!]t[!]o[!]r[!]y[!]:[!] [!].[!]/[!]L[!]M[!]S[!]-[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]R[!]u[!]n[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]T[!]e[!]s[!]t[!]s[!] [!]([!]4[!]2[!] [!]T[!]C[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]u[!]n[!]:[!] [!]p[!]h[!]p[!] [!]a[!]r[!]t[!]i[!]s[!]a[!]n[!] [!]t[!]e[!]s[!]t[!] [!]-[!]-[!]f[!]i[!]l[!]t[!]e[!]r[!]=[!]A[!]p[!]i[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]o[!]r[!]k[!]i[!]n[!]g[!]-[!]d[!]i[!]r[!]e[!]c[!]t[!]o[!]r[!]y[!]:[!] [!].[!]/[!]L[!]M[!]S[!]-[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!][!]
+[!][!]
+[!] [!] [!]#[!] [!]─[!]─[!]─[!] [!]S[!]t[!]a[!]g[!]e[!] [!]2[!]:[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]U[!]n[!]i[!]t[!] [!]T[!]e[!]s[!]t[!] [!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!][!]
+[!] [!] [!]a[!]n[!]d[!]r[!]o[!]i[!]d[!]-[!]t[!]e[!]s[!]t[!]:[!][!]
+[!] [!] [!] [!] [!]n[!]a[!]m[!]e[!]:[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]J[!]U[!]n[!]i[!]t[!] [!]T[!]e[!]s[!]t[!]s[!][!]
+[!] [!] [!] [!] [!]r[!]u[!]n[!]s[!]-[!]o[!]n[!]:[!] [!]u[!]b[!]u[!]n[!]t[!]u[!]-[!]l[!]a[!]t[!]e[!]s[!]t[!][!]
+[!] [!] [!] [!] [!]s[!]t[!]e[!]p[!]s[!]:[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]u[!]s[!]e[!]s[!]:[!] [!]a[!]c[!]t[!]i[!]o[!]n[!]s[!]/[!]c[!]h[!]e[!]c[!]k[!]o[!]u[!]t[!]@[!]v[!]4[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]S[!]e[!]t[!]u[!]p[!] [!]J[!]D[!]K[!] [!]1[!]7[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]u[!]s[!]e[!]s[!]:[!] [!]a[!]c[!]t[!]i[!]o[!]n[!]s[!]/[!]s[!]e[!]t[!]u[!]p[!]-[!]j[!]a[!]v[!]a[!]@[!]v[!]4[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]i[!]t[!]h[!]:[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]j[!]a[!]v[!]a[!]-[!]v[!]e[!]r[!]s[!]i[!]o[!]n[!]:[!] [!]'[!]1[!]7[!]'[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]d[!]i[!]s[!]t[!]r[!]i[!]b[!]u[!]t[!]i[!]o[!]n[!]:[!] [!]'[!]t[!]e[!]m[!]u[!]r[!]i[!]n[!]'[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]R[!]u[!]n[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]U[!]n[!]i[!]t[!] [!]T[!]e[!]s[!]t[!]s[!] [!]([!]3[!]2[!] [!]T[!]C[!])[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]u[!]n[!]:[!] [!].[!]/[!]g[!]r[!]a[!]d[!]l[!]e[!]w[!] [!]t[!]e[!]s[!]t[!]D[!]e[!]b[!]u[!]g[!]U[!]n[!]i[!]t[!]T[!]e[!]s[!]t[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]o[!]r[!]k[!]i[!]n[!]g[!]-[!]d[!]i[!]r[!]e[!]c[!]t[!]o[!]r[!]y[!]:[!] [!].[!]/[!]J[!]o[!]u[!]r[!]n[!]e[!]y[!]L[!]e[!]a[!]r[!]n[!]L[!]M[!]S[!]-[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!][!]
+[!][!]
+[!] [!] [!]#[!] [!]─[!]─[!]─[!] [!]S[!]t[!]a[!]g[!]e[!] [!]3[!]:[!] [!]B[!]u[!]i[!]l[!]d[!] [!]A[!]P[!]K[!] [!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!]─[!][!]
+[!] [!] [!]b[!]u[!]i[!]l[!]d[!]-[!]a[!]p[!]k[!]:[!][!]
+[!] [!] [!] [!] [!]n[!]a[!]m[!]e[!]:[!] [!]B[!]u[!]i[!]l[!]d[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]A[!]P[!]K[!][!]
+[!] [!] [!] [!] [!]r[!]u[!]n[!]s[!]-[!]o[!]n[!]:[!] [!]u[!]b[!]u[!]n[!]t[!]u[!]-[!]l[!]a[!]t[!]e[!]s[!]t[!][!]
+[!] [!] [!] [!] [!]n[!]e[!]e[!]d[!]s[!]:[!] [!][[!] [!]l[!]a[!]r[!]a[!]v[!]e[!]l[!]-[!]t[!]e[!]s[!]t[!],[!] [!]a[!]n[!]d[!]r[!]o[!]i[!]d[!]-[!]t[!]e[!]s[!]t[!] [!]][!] [!] [!]#[!] [!]H[!]a[!]n[!]y[!]a[!] [!]b[!]u[!]i[!]l[!]d[!] [!]j[!]i[!]k[!]a[!] [!]t[!]e[!]s[!]t[!] [!]l[!]u[!]l[!]u[!]s[!][!]
+[!] [!] [!] [!] [!]s[!]t[!]e[!]p[!]s[!]:[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]u[!]s[!]e[!]s[!]:[!] [!]a[!]c[!]t[!]i[!]o[!]n[!]s[!]/[!]c[!]h[!]e[!]c[!]k[!]o[!]u[!]t[!]@[!]v[!]4[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]S[!]e[!]t[!]u[!]p[!] [!]J[!]D[!]K[!] [!]1[!]7[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]u[!]s[!]e[!]s[!]:[!] [!]a[!]c[!]t[!]i[!]o[!]n[!]s[!]/[!]s[!]e[!]t[!]u[!]p[!]-[!]j[!]a[!]v[!]a[!]@[!]v[!]4[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]i[!]t[!]h[!]:[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]j[!]a[!]v[!]a[!]-[!]v[!]e[!]r[!]s[!]i[!]o[!]n[!]:[!] [!]'[!]1[!]7[!]'[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]d[!]i[!]s[!]t[!]r[!]i[!]b[!]u[!]t[!]i[!]o[!]n[!]:[!] [!]'[!]t[!]e[!]m[!]u[!]r[!]i[!]n[!]'[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]B[!]u[!]i[!]l[!]d[!] [!]D[!]e[!]b[!]u[!]g[!] [!]A[!]P[!]K[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]r[!]u[!]n[!]:[!] [!].[!]/[!]g[!]r[!]a[!]d[!]l[!]e[!]w[!] [!]a[!]s[!]s[!]e[!]m[!]b[!]l[!]e[!]D[!]e[!]b[!]u[!]g[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]o[!]r[!]k[!]i[!]n[!]g[!]-[!]d[!]i[!]r[!]e[!]c[!]t[!]o[!]r[!]y[!]:[!] [!].[!]/[!]J[!]o[!]u[!]r[!]n[!]e[!]y[!]L[!]e[!]a[!]r[!]n[!]L[!]M[!]S[!]-[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!][!]
+[!][!]
+[!] [!] [!] [!] [!] [!] [!]-[!] [!]n[!]a[!]m[!]e[!]:[!] [!]U[!]p[!]l[!]o[!]a[!]d[!] [!]A[!]P[!]K[!] [!]a[!]s[!] [!]A[!]r[!]t[!]i[!]f[!]a[!]c[!]t[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]u[!]s[!]e[!]s[!]:[!] [!]a[!]c[!]t[!]i[!]o[!]n[!]s[!]/[!]u[!]p[!]l[!]o[!]a[!]d[!]-[!]a[!]r[!]t[!]i[!]f[!]a[!]c[!]t[!]@[!]v[!]4[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!]w[!]i[!]t[!]h[!]:[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]n[!]a[!]m[!]e[!]:[!] [!]j[!]o[!]u[!]r[!]n[!]e[!]y[!]-[!]l[!]e[!]a[!]r[!]n[!]-[!]l[!]m[!]s[!]-[!]d[!]e[!]b[!]u[!]g[!][!]
+[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]p[!]a[!]t[!]h[!]:[!] [!]J[!]o[!]u[!]r[!]n[!]e[!]y[!]L[!]e[!]a[!]r[!]n[!]L[!]M[!]S[!]-[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]/[!]a[!]p[!]p[!]/[!]b[!]u[!]i[!]l[!]d[!]/[!]o[!]u[!]t[!]p[!]u[!]t[!]s[!]/[!]a[!]p[!]k[!]/[!]d[!]e[!]b[!]u[!]g[!]/[!]a[!]p[!]p[!]-[!]d[!]e[!]b[!]u[!]g[!].[!]a[!]p[!]k[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]4[!].[!]6[!].[!]4[!] [!]A[!]l[!]u[!]r[!] [!]O[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]y[!]a[!]n[!]g[!] [!]D[!]i[!]h[!]a[!]r[!]a[!]p[!]k[!]a[!]n[!][!]
+[!][!]
+[!]`[!]`[!]`[!]m[!]e[!]r[!]m[!]a[!]i[!]d[!][!]
+[!]f[!]l[!]o[!]w[!]c[!]h[!]a[!]r[!]t[!] [!]L[!]R[!][!]
+[!] [!] [!] [!] [!]A[!][[!]"[!]D[!]e[!]v[!]e[!]l[!]o[!]p[!]e[!]r[!]\[!]n[!]p[!]u[!]s[!]h[!] [!]k[!]e[!] [!]G[!]i[!]t[!]H[!]u[!]b[!]"[!]][!] [!]-[!]-[!]>[!] [!]B[!][[!]"[!]G[!]i[!]t[!]H[!]u[!]b[!] [!]A[!]c[!]t[!]i[!]o[!]n[!]s[!]\[!]n[!]T[!]r[!]i[!]g[!]g[!]e[!]r[!]"[!]][!][!]
+[!] [!] [!] [!] [!]B[!] [!]-[!]-[!]>[!] [!]C[!][[!]"[!]S[!]t[!]a[!]g[!]e[!] [!]1[!]\[!]n[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!]\[!]n[!]4[!]2[!] [!]T[!]e[!]s[!]t[!] [!]C[!]a[!]s[!]e[!]s[!]"[!]][!][!]
+[!] [!] [!] [!] [!]B[!] [!]-[!]-[!]>[!] [!]D[!][[!]"[!]S[!]t[!]a[!]g[!]e[!] [!]2[!]\[!]n[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]J[!]U[!]n[!]i[!]t[!]\[!]n[!]3[!]2[!] [!]T[!]e[!]s[!]t[!] [!]C[!]a[!]s[!]e[!]s[!]"[!]][!][!]
+[!] [!] [!] [!] [!]C[!] [!]-[!]-[!]>[!] [!]E[!]{[!]S[!]e[!]m[!]u[!]a[!]\[!]n[!]t[!]e[!]s[!]t[!] [!]l[!]u[!]l[!]u[!]s[!]?[!]}[!][!]
+[!] [!] [!] [!] [!]D[!] [!]-[!]-[!]>[!] [!]E[!][!]
+[!] [!] [!] [!] [!]E[!] [!]-[!]-[!]>[!]|[!]Y[!]a[!]|[!] [!]F[!][[!]"[!]S[!]t[!]a[!]g[!]e[!] [!]3[!]\[!]n[!]B[!]u[!]i[!]l[!]d[!] [!]A[!]P[!]K[!]"[!]][!][!]
+[!] [!] [!] [!] [!]E[!] [!]-[!]-[!]>[!]|[!]T[!]i[!]d[!]a[!]k[!]|[!] [!]G[!][[!]"[!]T[!]i[!]d[!]a[!]k[!] [!]P[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!] [!]G[!]a[!]g[!]a[!]l[!]\[!]n[!]N[!]o[!]t[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!] [!]k[!]e[!] [!]D[!]e[!]v[!]e[!]l[!]o[!]p[!]e[!]r[!]"[!]][!][!]
+[!] [!] [!] [!] [!]F[!] [!]-[!]-[!]>[!] [!]H[!][[!]"[!]Y[!]a[!] [!]A[!]P[!]K[!] [!]t[!]e[!]r[!]s[!]e[!]d[!]i[!]a[!]\[!]n[!]d[!]i[!] [!]G[!]i[!]t[!]H[!]u[!]b[!] [!]A[!]r[!]t[!]i[!]f[!]a[!]c[!]t[!]s[!]"[!]][!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]>[!] [!]*[!]*[!]S[!]t[!]a[!]t[!]u[!]s[!] [!]s[!]a[!]a[!]t[!] [!]i[!]n[!]i[!]:[!]*[!]*[!] [!]P[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!] [!]C[!]I[!]/[!]C[!]D[!] [!]*[!]*[!]b[!]e[!]l[!]u[!]m[!] [!]d[!]i[!]t[!]e[!]r[!]a[!]p[!]k[!]a[!]n[!]*[!]*[!] [!]([!]m[!]a[!]s[!]i[!]h[!] [!]d[!]a[!]l[!]a[!]m[!] [!]t[!]a[!]h[!]a[!]p[!] [!]r[!]e[!]n[!]c[!]a[!]n[!]a[!])[!].[!] [!]B[!]u[!]i[!]l[!]d[!] [!]d[!]a[!]n[!] [!]t[!]e[!]s[!]t[!] [!]s[!]a[!]a[!]t[!] [!]i[!]n[!]i[!] [!]d[!]i[!]j[!]a[!]l[!]a[!]n[!]k[!]a[!]n[!] [!]s[!]e[!]c[!]a[!]r[!]a[!] [!]m[!]a[!]n[!]u[!]a[!]l[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]p[!]e[!]r[!]i[!]n[!]t[!]a[!]h[!] [!]G[!]r[!]a[!]d[!]l[!]e[!] [!]d[!]a[!]n[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]d[!]i[!] [!]l[!]i[!]n[!]g[!]k[!]u[!]n[!]g[!]a[!]n[!] [!]l[!]o[!]k[!]a[!]l[!].[!] [!]I[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!] [!]G[!]i[!]t[!]H[!]u[!]b[!] [!]A[!]c[!]t[!]i[!]o[!]n[!]s[!] [!]m[!]e[!]n[!]j[!]a[!]d[!]i[!] [!]s[!]a[!]l[!]a[!]h[!] [!]s[!]a[!]t[!]u[!] [!]i[!]t[!]e[!]m[!] [!]p[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]l[!]a[!]n[!]j[!]u[!]t[!]a[!]n[!] [!]y[!]a[!]n[!]g[!] [!]d[!]i[!]r[!]e[!]k[!]o[!]m[!]e[!]n[!]d[!]a[!]s[!]i[!]k[!]a[!]n[!].[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]B[!]A[!]B[!] [!]V[!] [!]—[!] [!]R[!]E[!]N[!]C[!]A[!]N[!]A[!] [!]E[!]V[!]A[!]L[!]U[!]A[!]S[!]I[!] [!]D[!]A[!]N[!] [!]K[!]E[!]L[!]U[!]A[!]R[!]A[!]N[!] [!]P[!]R[!]O[!]Y[!]E[!]K[!][!]
+[!][!]
+[!]#[!]#[!] [!]5[!].[!]1[!] [!]K[!]e[!]l[!]u[!]a[!]r[!]a[!]n[!] [!]/[!] [!]D[!]e[!]l[!]i[!]v[!]e[!]r[!]a[!]b[!]l[!]e[!]s[!][!]
+[!][!]
+[!]B[!]e[!]r[!]i[!]k[!]u[!]t[!] [!]a[!]d[!]a[!]l[!]a[!]h[!] [!]k[!]e[!]l[!]u[!]a[!]r[!]a[!]n[!] [!]([!]*[!]d[!]e[!]l[!]i[!]v[!]e[!]r[!]a[!]b[!]l[!]e[!]s[!]*[!])[!] [!]y[!]a[!]n[!]g[!] [!]d[!]i[!]h[!]a[!]s[!]i[!]l[!]k[!]a[!]n[!] [!]d[!]a[!]r[!]i[!] [!]p[!]r[!]o[!]y[!]e[!]k[!] [!]*[!]*[!]J[!]o[!]u[!]r[!]n[!]e[!]y[!] [!]L[!]e[!]a[!]r[!]n[!] [!]L[!]M[!]S[!]*[!]*[!]:[!][!]
+[!][!]
+[!]|[!] [!]N[!]o[!] [!]|[!] [!]D[!]e[!]l[!]i[!]v[!]e[!]r[!]a[!]b[!]l[!]e[!] [!]|[!] [!]D[!]e[!]s[!]k[!]r[!]i[!]p[!]s[!]i[!] [!]|[!] [!]S[!]t[!]a[!]t[!]u[!]s[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]1[!] [!]|[!] [!]*[!]*[!]A[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]W[!]e[!]b[!] [!]F[!]u[!]n[!]g[!]s[!]i[!]o[!]n[!]a[!]l[!]*[!]*[!] [!]|[!] [!]S[!]i[!]s[!]t[!]e[!]m[!] [!]L[!]M[!]S[!] [!]b[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]f[!]i[!]t[!]u[!]r[!] [!]m[!]a[!]n[!]a[!]j[!]e[!]m[!]e[!]n[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]([!]v[!]i[!]d[!]e[!]o[!]/[!]t[!]e[!]x[!]t[!]/[!]q[!]u[!]i[!]z[!])[!],[!] [!]e[!]n[!]r[!]o[!]l[!]l[!]m[!]e[!]n[!]t[!],[!] [!]d[!]a[!]n[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]y[!]a[!]n[!]g[!] [!]d[!]a[!]p[!]a[!]t[!] [!]d[!]i[!]a[!]k[!]s[!]e[!]s[!] [!]v[!]i[!]a[!] [!]b[!]r[!]o[!]w[!]s[!]e[!]r[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]2[!] [!]|[!] [!]*[!]*[!]A[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]M[!]o[!]b[!]i[!]l[!]e[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]*[!]*[!] [!]|[!] [!]A[!]P[!]K[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]([!]J[!]a[!]v[!]a[!])[!] [!]b[!]e[!]r[!]u[!]k[!]u[!]r[!]a[!]n[!] [!]6[!].[!]4[!] [!]M[!]B[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]d[!]u[!]k[!]u[!]n[!]g[!] [!]l[!]o[!]g[!]i[!]n[!],[!] [!]b[!]r[!]o[!]w[!]s[!]e[!] [!]k[!]e[!]l[!]a[!]s[!],[!] [!]a[!]k[!]s[!]e[!]s[!] [!]m[!]a[!]t[!]e[!]r[!]i[!],[!] [!]d[!]a[!]n[!] [!]s[!]u[!]b[!]m[!]i[!]t[!] [!]k[!]u[!]i[!]s[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]3[!] [!]|[!] [!]*[!]*[!]R[!]E[!]S[!]T[!]f[!]u[!]l[!] [!]A[!]P[!]I[!]*[!]*[!] [!]|[!] [!]1[!]2[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!] [!]A[!]P[!]I[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]a[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]B[!]e[!]a[!]r[!]e[!]r[!] [!]T[!]o[!]k[!]e[!]n[!] [!]([!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!])[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]j[!]e[!]m[!]b[!]a[!]t[!]a[!]n[!] [!]a[!]n[!]t[!]a[!]r[!]a[!] [!]b[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]d[!]a[!]n[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]m[!]o[!]b[!]i[!]l[!]e[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]4[!] [!]|[!] [!]*[!]*[!]D[!]o[!]k[!]u[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!] [!]T[!]e[!]k[!]n[!]i[!]s[!]*[!]*[!] [!]|[!] [!]F[!]i[!]l[!]e[!] [!]`[!]R[!]E[!]A[!]D[!]M[!]E[!].[!]m[!]d[!]`[!],[!] [!]`[!]A[!]N[!]D[!]R[!]O[!]I[!]D[!]_[!]D[!]A[!]N[!]_[!]A[!]P[!]I[!].[!]m[!]d[!]`[!],[!] [!]`[!]A[!]R[!]S[!]I[!]T[!]E[!]K[!]T[!]U[!]R[!]_[!]D[!]A[!]N[!]_[!]S[!]D[!]L[!]C[!].[!]m[!]d[!]`[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]c[!]a[!]k[!]u[!]p[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!],[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!] [!]A[!]P[!]I[!],[!] [!]d[!]a[!]n[!] [!]p[!]a[!]n[!]d[!]u[!]a[!]n[!] [!]p[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]a[!]n[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]5[!] [!]|[!] [!]*[!]*[!]L[!]a[!]p[!]o[!]r[!]a[!]n[!] [!]P[!]r[!]o[!]y[!]e[!]k[!]*[!]*[!] [!]|[!] [!]L[!]a[!]p[!]o[!]r[!]a[!]n[!] [!]l[!]e[!]n[!]g[!]k[!]a[!]p[!] [!]m[!]e[!]n[!]g[!]i[!]k[!]u[!]t[!]i[!] [!]f[!]o[!]r[!]m[!]a[!]t[!] [!]t[!]e[!]m[!]p[!]l[!]a[!]t[!]e[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]n[!]c[!]a[!]k[!]u[!]p[!] [!]l[!]a[!]t[!]a[!]r[!] [!]b[!]e[!]l[!]a[!]k[!]a[!]n[!]g[!],[!] [!]l[!]a[!]n[!]d[!]a[!]s[!]a[!]n[!] [!]t[!]e[!]o[!]r[!]i[!],[!] [!]m[!]e[!]t[!]o[!]d[!]o[!]l[!]o[!]g[!]i[!],[!] [!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!],[!] [!]d[!]a[!]n[!] [!]p[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]6[!] [!]|[!] [!]*[!]*[!]H[!]a[!]s[!]i[!]l[!] [!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!]*[!]*[!] [!]|[!] [!]L[!]a[!]p[!]o[!]r[!]a[!]n[!] [!]w[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!] [!]t[!]e[!]s[!]t[!]i[!]n[!]g[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]t[!]o[!]t[!]a[!]l[!] [!]*[!]*[!]7[!]4[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!]*[!]*[!] [!]([!]4[!]2[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]+[!] [!]3[!]2[!] [!]J[!]U[!]n[!]i[!]t[!])[!] [!]—[!] [!]s[!]e[!]m[!]u[!]a[!] [!]P[!]A[!]S[!]S[!]E[!]D[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]7[!] [!]|[!] [!]*[!]*[!]R[!]e[!]n[!]c[!]a[!]n[!]a[!] [!]C[!]I[!]/[!]C[!]D[!]*[!]*[!] [!]|[!] [!]R[!]a[!]n[!]c[!]a[!]n[!]g[!]a[!]n[!] [!]p[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!] [!]G[!]i[!]t[!]H[!]u[!]b[!] [!]A[!]c[!]t[!]i[!]o[!]n[!]s[!] [!]u[!]n[!]t[!]u[!]k[!] [!]o[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]b[!]u[!]i[!]l[!]d[!],[!] [!]t[!]e[!]s[!]t[!],[!] [!]d[!]a[!]n[!] [!]d[!]e[!]p[!]l[!]o[!]y[!] [!]([!]d[!]o[!]k[!]u[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!] [!]`[!].[!]g[!]i[!]t[!]h[!]u[!]b[!]/[!]w[!]o[!]r[!]k[!]f[!]l[!]o[!]w[!]s[!]/[!]c[!]i[!].[!]y[!]m[!]l[!]`[!])[!] [!]|[!] [!][[!]R[!]e[!]n[!]c[!]a[!]n[!]a[!]][!] [!]R[!]e[!]n[!]c[!]a[!]n[!]a[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!] [!]5[!].[!]2[!] [!]I[!]n[!]d[!]i[!]k[!]a[!]t[!]o[!]r[!] [!]K[!]e[!]b[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!]a[!]n[!][!]
+[!][!]
+[!]K[!]e[!]b[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!]a[!]n[!] [!]p[!]r[!]o[!]y[!]e[!]k[!] [!]d[!]i[!]u[!]k[!]u[!]r[!] [!]b[!]e[!]r[!]d[!]a[!]s[!]a[!]r[!]k[!]a[!]n[!] [!]i[!]n[!]d[!]i[!]k[!]a[!]t[!]o[!]r[!]-[!]i[!]n[!]d[!]i[!]k[!]a[!]t[!]o[!]r[!] [!]b[!]e[!]r[!]i[!]k[!]u[!]t[!]:[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]F[!]u[!]n[!]g[!]s[!]i[!]o[!]n[!]a[!]l[!]i[!]t[!]a[!]s[!] [!]S[!]e[!]s[!]u[!]a[!]i[!] [!]S[!]p[!]e[!]s[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!][!]
+[!][!]
+[!]|[!] [!]I[!]n[!]d[!]i[!]k[!]a[!]t[!]o[!]r[!] [!]|[!] [!]T[!]a[!]r[!]g[!]e[!]t[!] [!]|[!] [!]H[!]a[!]s[!]i[!]l[!] [!]|[!] [!]S[!]t[!]a[!]t[!]u[!]s[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]L[!]o[!]g[!]i[!]n[!] [!]&[!] [!]a[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]b[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!] [!]|[!] [!]T[!]o[!]k[!]e[!]n[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!] [!]d[!]i[!]t[!]e[!]r[!]i[!]m[!]a[!] [!]|[!] [!]Y[!]a[!] [!]B[!]e[!]r[!]f[!]u[!]n[!]g[!]s[!]i[!] [!]d[!]i[!] [!]w[!]e[!]b[!] [!]&[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]S[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]l[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]b[!]e[!]r[!]j[!]a[!]l[!]a[!]n[!] [!]|[!] [!]M[!]a[!]t[!]e[!]r[!]i[!] [!]N[!]+[!]1[!] [!]t[!]e[!]r[!]k[!]u[!]n[!]c[!]i[!] [!]j[!]i[!]k[!]a[!] [!]N[!] [!]b[!]e[!]l[!]u[!]m[!] [!]s[!]e[!]l[!]e[!]s[!]a[!]i[!] [!]|[!] [!]Y[!]a[!] [!]D[!]i[!]k[!]o[!]n[!]f[!]i[!]r[!]m[!]a[!]s[!]i[!] [!]v[!]i[!]a[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]Q[!]u[!]i[!]z[!] [!]a[!]u[!]t[!]o[!]-[!]g[!]r[!]a[!]d[!]i[!]n[!]g[!] [!]|[!] [!]N[!]i[!]l[!]a[!]i[!] [!]d[!]i[!]h[!]i[!]t[!]u[!]n[!]g[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!],[!] [!]l[!]u[!]l[!]u[!]s[!] [!]j[!]i[!]k[!]a[!] [!]≥[!] [!]7[!]0[!] [!]|[!] [!]Y[!]a[!] [!]B[!]e[!]r[!]f[!]u[!]n[!]g[!]s[!]i[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]b[!]a[!]t[!]a[!]s[!] [!]3[!]x[!] [!]p[!]e[!]r[!]c[!]o[!]b[!]a[!]a[!]n[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]P[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!] [!]t[!]r[!]a[!]c[!]k[!]i[!]n[!]g[!] [!]|[!] [!]S[!]t[!]a[!]t[!]u[!]s[!] [!]p[!]e[!]r[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]t[!]e[!]r[!]s[!]i[!]m[!]p[!]a[!]n[!] [!]d[!]i[!] [!]d[!]a[!]t[!]a[!]b[!]a[!]s[!]e[!] [!]|[!] [!]Y[!]a[!] [!]T[!]a[!]b[!]e[!]l[!] [!]`[!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!]`[!] [!]b[!]e[!]r[!]f[!]u[!]n[!]g[!]s[!]i[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]R[!]o[!]l[!]e[!]-[!]b[!]a[!]s[!]e[!]d[!] [!]a[!]c[!]c[!]e[!]s[!]s[!] [!]|[!] [!]D[!]o[!]s[!]e[!]n[!] [!]≠[!] [!]M[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]d[!]a[!]l[!]a[!]m[!] [!]h[!]a[!]k[!] [!]a[!]k[!]s[!]e[!]s[!] [!]|[!] [!]Y[!]a[!] [!]M[!]i[!]d[!]d[!]l[!]e[!]w[!]a[!]r[!]e[!] [!]r[!]o[!]l[!]e[!] [!]b[!]e[!]r[!]j[!]a[!]l[!]a[!]n[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]I[!]n[!]t[!]e[!]g[!]r[!]a[!]s[!]i[!] [!]B[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]d[!]a[!]n[!] [!]F[!]r[!]o[!]n[!]t[!]e[!]n[!]d[!] [!]/[!] [!]M[!]o[!]b[!]i[!]l[!]e[!] [!]B[!]e[!]r[!]j[!]a[!]l[!]a[!]n[!] [!]L[!]a[!]n[!]c[!]a[!]r[!][!]
+[!][!]
+[!]|[!] [!]I[!]n[!]d[!]i[!]k[!]a[!]t[!]o[!]r[!] [!]|[!] [!]T[!]a[!]r[!]g[!]e[!]t[!] [!]|[!] [!]H[!]a[!]s[!]i[!]l[!] [!]|[!] [!]S[!]t[!]a[!]t[!]u[!]s[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]W[!]e[!]b[!] [!]↔[!] [!]D[!]a[!]t[!]a[!]b[!]a[!]s[!]e[!] [!]|[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]E[!]l[!]o[!]q[!]u[!]e[!]n[!]t[!] [!]→[!] [!]M[!]y[!]S[!]Q[!]L[!] [!]|[!] [!]Y[!]a[!] [!]7[!] [!]t[!]a[!]b[!]e[!]l[!] [!]t[!]e[!]r[!]h[!]u[!]b[!]u[!]n[!]g[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]↔[!] [!]A[!]P[!]I[!] [!]|[!] [!]R[!]e[!]t[!]r[!]o[!]f[!]i[!]t[!] [!]+[!] [!]O[!]k[!]H[!]t[!]t[!]p[!] [!]→[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]A[!]P[!]I[!] [!]|[!] [!]Y[!]a[!] [!]1[!]2[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!] [!]t[!]e[!]r[!]p[!]a[!]n[!]g[!]g[!]i[!]l[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]b[!]e[!]n[!]a[!]r[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]T[!]o[!]k[!]e[!]n[!] [!]p[!]r[!]o[!]p[!]a[!]g[!]a[!]s[!]i[!] [!]|[!] [!]B[!]e[!]a[!]r[!]e[!]r[!] [!]t[!]o[!]k[!]e[!]n[!] [!]d[!]i[!]k[!]i[!]r[!]i[!]m[!] [!]d[!]i[!] [!]s[!]e[!]t[!]i[!]a[!]p[!] [!]r[!]e[!]q[!]u[!]e[!]s[!]t[!] [!]|[!] [!]Y[!]a[!] [!]O[!]k[!]H[!]t[!]t[!]p[!] [!]I[!]n[!]t[!]e[!]r[!]c[!]e[!]p[!]t[!]o[!]r[!] [!]b[!]e[!]r[!]f[!]u[!]n[!]g[!]s[!]i[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]d[!]i[!] [!]W[!]e[!]b[!]V[!]i[!]e[!]w[!] [!]|[!] [!]V[!]i[!]d[!]e[!]o[!] [!]d[!]i[!]p[!]u[!]t[!]a[!]r[!] [!]t[!]a[!]n[!]p[!]a[!] [!]E[!]r[!]r[!]o[!]r[!] [!]1[!]5[!]3[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]t[!]e[!]l[!]a[!]h[!] [!]f[!]i[!]x[!] [!]`[!]l[!]o[!]a[!]d[!]D[!]a[!]t[!]a[!]W[!]i[!]t[!]h[!]B[!]a[!]s[!]e[!]U[!]R[!]L[!]`[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]Q[!]u[!]i[!]z[!] [!]s[!]u[!]b[!]m[!]i[!]t[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]|[!] [!]J[!]a[!]w[!]a[!]b[!]a[!]n[!] [!]J[!]S[!]O[!]N[!] [!]d[!]i[!]k[!]i[!]r[!]i[!]m[!] [!]&[!] [!]d[!]i[!]n[!]i[!]l[!]a[!]i[!] [!]s[!]e[!]r[!]v[!]e[!]r[!] [!]|[!] [!]Y[!]a[!] [!]S[!]e[!]t[!]e[!]l[!]a[!]h[!] [!]f[!]i[!]x[!] [!]`[!]r[!]g[!].[!]f[!]i[!]n[!]d[!]V[!]i[!]e[!]w[!]B[!]y[!]I[!]d[!]`[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]P[!]e[!]n[!]e[!]r[!]a[!]p[!]a[!]n[!] [!]S[!]t[!]a[!]n[!]d[!]a[!]r[!] [!]K[!]e[!]a[!]m[!]a[!]n[!]a[!]n[!] [!]B[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!][!]
+[!][!]
+[!]|[!] [!]I[!]n[!]d[!]i[!]k[!]a[!]t[!]o[!]r[!] [!]|[!] [!]T[!]a[!]r[!]g[!]e[!]t[!] [!]|[!] [!]H[!]a[!]s[!]i[!]l[!] [!]|[!] [!]S[!]t[!]a[!]t[!]u[!]s[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]A[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]P[!]I[!] [!]|[!] [!]S[!]e[!]m[!]u[!]a[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!] [!]p[!]r[!]o[!]t[!]e[!]c[!]t[!]e[!]d[!] [!]m[!]e[!]m[!]e[!]r[!]l[!]u[!]k[!]a[!]n[!] [!]t[!]o[!]k[!]e[!]n[!] [!]v[!]a[!]l[!]i[!]d[!] [!]|[!] [!]Y[!]a[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!] [!]m[!]i[!]d[!]d[!]l[!]e[!]w[!]a[!]r[!]e[!] [!]a[!]k[!]t[!]i[!]f[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]C[!]S[!]R[!]F[!] [!]P[!]r[!]o[!]t[!]e[!]c[!]t[!]i[!]o[!]n[!] [!]|[!] [!]S[!]e[!]m[!]u[!]a[!] [!]f[!]o[!]r[!]m[!] [!]w[!]e[!]b[!] [!]t[!]e[!]r[!]l[!]i[!]n[!]d[!]u[!]n[!]g[!]i[!] [!]C[!]S[!]R[!]F[!] [!]|[!] [!]Y[!]a[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]C[!]S[!]R[!]F[!] [!]t[!]o[!]k[!]e[!]n[!] [!]b[!]u[!]i[!]l[!]t[!]-[!]i[!]n[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]S[!]Q[!]L[!] [!]I[!]n[!]j[!]e[!]c[!]t[!]i[!]o[!]n[!] [!]P[!]r[!]e[!]v[!]e[!]n[!]t[!]i[!]o[!]n[!] [!]|[!] [!]Q[!]u[!]e[!]r[!]y[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]E[!]l[!]o[!]q[!]u[!]e[!]n[!]t[!] [!]O[!]R[!]M[!] [!]([!]p[!]a[!]r[!]a[!]m[!]e[!]t[!]e[!]r[!] [!]b[!]i[!]n[!]d[!]i[!]n[!]g[!])[!] [!]|[!] [!]Y[!]a[!] [!]T[!]i[!]d[!]a[!]k[!] [!]a[!]d[!]a[!] [!]r[!]a[!]w[!] [!]q[!]u[!]e[!]r[!]y[!] [!]t[!]a[!]n[!]p[!]a[!] [!]b[!]i[!]n[!]d[!]i[!]n[!]g[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]X[!]S[!]S[!] [!]P[!]r[!]e[!]v[!]e[!]n[!]t[!]i[!]o[!]n[!] [!]|[!] [!]O[!]u[!]t[!]p[!]u[!]t[!] [!]d[!]i[!] [!]B[!]l[!]a[!]d[!]e[!] [!]t[!]e[!]m[!]p[!]l[!]a[!]t[!]e[!] [!]d[!]i[!]-[!]e[!]s[!]c[!]a[!]p[!]e[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!] [!]|[!] [!]Y[!]a[!] [!]`[!]{[!]{[!] [!]}[!]}[!]`[!] [!]B[!]l[!]a[!]d[!]e[!] [!]e[!]s[!]c[!]a[!]p[!]i[!]n[!]g[!] [!]a[!]k[!]t[!]i[!]f[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]R[!]o[!]l[!]e[!] [!]A[!]u[!]t[!]h[!]o[!]r[!]i[!]z[!]a[!]t[!]i[!]o[!]n[!] [!]|[!] [!]D[!]o[!]s[!]e[!]n[!] [!]t[!]i[!]d[!]a[!]k[!] [!]b[!]i[!]s[!]a[!] [!]e[!]n[!]r[!]o[!]l[!]l[!];[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]t[!]i[!]d[!]a[!]k[!] [!]b[!]i[!]s[!]a[!] [!]b[!]u[!]a[!]t[!] [!]k[!]e[!]l[!]a[!]s[!] [!]|[!] [!]Y[!]a[!] [!]D[!]i[!]k[!]o[!]n[!]f[!]i[!]r[!]m[!]a[!]s[!]i[!] [!]v[!]i[!]a[!] [!]t[!]e[!]s[!]t[!] [!]+[!] [!]m[!]i[!]d[!]d[!]l[!]e[!]w[!]a[!]r[!]e[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!]|[!] [!]T[!]o[!]k[!]e[!]n[!] [!]E[!]x[!]p[!]i[!]r[!]y[!] [!]|[!] [!]T[!]o[!]k[!]e[!]n[!] [!]l[!]a[!]m[!]a[!] [!]d[!]i[!]h[!]a[!]p[!]u[!]s[!] [!]s[!]a[!]a[!]t[!] [!]l[!]o[!]g[!]i[!]n[!] [!]b[!]a[!]r[!]u[!] [!]|[!] [!]Y[!]a[!] [!]`[!]$[!]u[!]s[!]e[!]r[!]-[!]>[!]t[!]o[!]k[!]e[!]n[!]s[!]([!])[!]-[!]>[!]d[!]e[!]l[!]e[!]t[!]e[!]([!])[!]`[!] [!]s[!]e[!]b[!]e[!]l[!]u[!]m[!] [!]b[!]u[!]a[!]t[!] [!]t[!]o[!]k[!]e[!]n[!] [!]b[!]a[!]r[!]u[!] [!]|[!] [!]Y[!]a[!] [!]T[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!] [!]|[!][!]
+[!][!]
+[!]#[!]#[!]#[!] [!]R[!]e[!]k[!]a[!]p[!] [!]K[!]e[!]b[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!]a[!]n[!] [!]K[!]e[!]s[!]e[!]l[!]u[!]r[!]u[!]h[!]a[!]n[!][!]
+[!][!]
+[!]`[!]`[!]`[!][!]
+[!]D[!]e[!]l[!]i[!]v[!]e[!]r[!]a[!]b[!]l[!]e[!]s[!]:[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]7[!] [!]/[!] [!]7[!] [!] [!] [!]([!]6[!] [!]s[!]e[!]l[!]e[!]s[!]a[!]i[!],[!] [!]1[!] [!]r[!]e[!]n[!]c[!]a[!]n[!]a[!])[!][!]
+[!]F[!]u[!]n[!]g[!]s[!]i[!]o[!]n[!]a[!]l[!]i[!]t[!]a[!]s[!]:[!] [!] [!] [!] [!] [!] [!] [!] [!]5[!] [!]/[!] [!]5[!] [!] [!] [!]Y[!]a[!] [!]S[!]e[!]m[!]u[!]a[!] [!]t[!]e[!]r[!]c[!]a[!]p[!]a[!]i[!][!]
+[!]I[!]n[!]t[!]e[!]g[!]r[!]a[!]s[!]i[!]:[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]5[!] [!]/[!] [!]5[!] [!] [!] [!]Y[!]a[!] [!]S[!]e[!]m[!]u[!]a[!] [!]b[!]e[!]r[!]j[!]a[!]l[!]a[!]n[!][!]
+[!]K[!]e[!]a[!]m[!]a[!]n[!]a[!]n[!]:[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]6[!] [!]/[!] [!]6[!] [!] [!] [!]Y[!]a[!] [!]S[!]e[!]m[!]u[!]a[!] [!]d[!]i[!]t[!]e[!]r[!]a[!]p[!]k[!]a[!]n[!][!]
+[!]W[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!] [!]T[!]e[!]s[!]t[!]i[!]n[!]g[!]:[!] [!] [!] [!] [!]7[!]4[!] [!]/[!] [!]7[!]4[!] [!] [!]Y[!]a[!] [!]1[!]0[!]0[!]%[!] [!]P[!]A[!]S[!]S[!]E[!]D[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]B[!]A[!]B[!] [!]V[!]I[!] [!]—[!] [!]P[!]E[!]N[!]U[!]T[!]U[!]P[!][!]
+[!][!]
+[!]#[!]#[!] [!]6[!].[!]1[!] [!]K[!]e[!]s[!]i[!]m[!]p[!]u[!]l[!]a[!]n[!][!]
+[!][!]
+[!]B[!]e[!]r[!]d[!]a[!]s[!]a[!]r[!]k[!]a[!]n[!] [!]h[!]a[!]s[!]i[!]l[!] [!]p[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]d[!]a[!]n[!] [!]p[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]y[!]a[!]n[!]g[!] [!]t[!]e[!]l[!]a[!]h[!] [!]d[!]i[!]l[!]a[!]k[!]u[!]k[!]a[!]n[!],[!] [!]d[!]a[!]p[!]a[!]t[!] [!]d[!]i[!]s[!]i[!]m[!]p[!]u[!]l[!]k[!]a[!]n[!]:[!][!]
+[!][!]
+[!]1[!].[!] [!]*[!]*[!]B[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!] [!]d[!]i[!]r[!]a[!]n[!]c[!]a[!]n[!]g[!] [!]d[!]a[!]n[!] [!]d[!]i[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!]*[!]*[!] [!]s[!]i[!]s[!]t[!]e[!]m[!] [!]L[!]M[!]S[!] [!]t[!]e[!]r[!]p[!]a[!]d[!]u[!] [!]b[!]e[!]r[!]b[!]a[!]s[!]i[!]s[!] [!]*[!]C[!]l[!]i[!]e[!]n[!]t[!]-[!]S[!]e[!]r[!]v[!]e[!]r[!]*[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!] [!]([!]b[!]a[!]c[!]k[!]e[!]n[!]d[!]/[!]w[!]e[!]b[!])[!],[!] [!]M[!]y[!]S[!]Q[!]L[!] [!]8[!].[!]0[!] [!]([!]d[!]a[!]t[!]a[!]b[!]a[!]s[!]e[!])[!],[!] [!]d[!]a[!]n[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]N[!]a[!]t[!]i[!]v[!]e[!] [!]J[!]a[!]v[!]a[!] [!]([!]m[!]o[!]b[!]i[!]l[!]e[!])[!],[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]a[!]r[!]s[!]i[!]t[!]e[!]k[!]t[!]u[!]r[!] [!]M[!]V[!]C[!] [!]y[!]a[!]n[!]g[!] [!]t[!]e[!]r[!]s[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!] [!]d[!]a[!]n[!] [!]m[!]o[!]d[!]u[!]l[!]a[!]r[!].[!][!]
+[!][!]
+[!]2[!].[!] [!]*[!]*[!]B[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!] [!]d[!]i[!]b[!]a[!]n[!]g[!]u[!]n[!] [!]R[!]E[!]S[!]T[!]f[!]u[!]l[!] [!]A[!]P[!]I[!]*[!]*[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]1[!]2[!] [!]e[!]n[!]d[!]p[!]o[!]i[!]n[!]t[!] [!]y[!]a[!]n[!]g[!] [!]a[!]m[!]a[!]n[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]a[!]u[!]t[!]e[!]n[!]t[!]i[!]k[!]a[!]s[!]i[!] [!]B[!]e[!]a[!]r[!]e[!]r[!] [!]T[!]o[!]k[!]e[!]n[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!],[!] [!]m[!]e[!]m[!]u[!]n[!]g[!]k[!]i[!]n[!]k[!]a[!]n[!] [!]k[!]o[!]m[!]u[!]n[!]i[!]k[!]a[!]s[!]i[!] [!]d[!]a[!]t[!]a[!] [!]y[!]a[!]n[!]g[!] [!]e[!]f[!]i[!]s[!]i[!]e[!]n[!] [!]a[!]n[!]t[!]a[!]r[!]a[!] [!]b[!]a[!]c[!]k[!]e[!]n[!]d[!] [!]d[!]a[!]n[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!].[!][!]
+[!][!]
+[!]3[!].[!] [!]*[!]*[!]B[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!] [!]d[!]i[!]i[!]m[!]p[!]l[!]e[!]m[!]e[!]n[!]t[!]a[!]s[!]i[!]k[!]a[!]n[!] [!]f[!]i[!]t[!]u[!]r[!] [!]s[!]e[!]q[!]u[!]e[!]n[!]t[!]i[!]a[!]l[!] [!]l[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!]*[!]*[!] [!]y[!]a[!]n[!]g[!] [!]m[!]e[!]m[!]a[!]s[!]t[!]i[!]k[!]a[!]n[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]m[!]e[!]n[!]g[!]a[!]k[!]s[!]e[!]s[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]s[!]e[!]c[!]a[!]r[!]a[!] [!]b[!]e[!]r[!]u[!]r[!]u[!]t[!]a[!]n[!],[!] [!]s[!]e[!]r[!]t[!]a[!] [!]*[!]*[!]s[!]i[!]s[!]t[!]e[!]m[!] [!]k[!]u[!]i[!]s[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!]*[!]*[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]a[!]u[!]t[!]o[!]-[!]g[!]r[!]a[!]d[!]i[!]n[!]g[!],[!] [!]b[!]a[!]t[!]a[!]s[!] [!]m[!]a[!]k[!]s[!]i[!]m[!]a[!]l[!] [!]3[!] [!]p[!]e[!]r[!]c[!]o[!]b[!]a[!]a[!]n[!],[!] [!]d[!]a[!]n[!] [!]n[!]i[!]l[!]a[!]i[!] [!]m[!]i[!]n[!]i[!]m[!]u[!]m[!] [!]7[!]0[!] [!]u[!]n[!]t[!]u[!]k[!] [!]k[!]e[!]l[!]u[!]l[!]u[!]s[!]a[!]n[!].[!][!]
+[!][!]
+[!]4[!].[!] [!]*[!]*[!]P[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!] [!]w[!]h[!]i[!]t[!]e[!]-[!]b[!]o[!]x[!] [!]b[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!] [!]d[!]i[!]l[!]a[!]k[!]s[!]a[!]n[!]a[!]k[!]a[!]n[!]*[!]*[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]t[!]o[!]t[!]a[!]l[!] [!]*[!]*[!]7[!]4[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!]*[!]*[!] [!]([!]4[!]2[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]+[!] [!]3[!]2[!] [!]J[!]U[!]n[!]i[!]t[!])[!] [!]d[!]a[!]n[!] [!]s[!]e[!]l[!]u[!]r[!]u[!]h[!]n[!]y[!]a[!] [!]*[!]*[!]P[!]A[!]S[!]S[!]E[!]D[!]*[!]*[!] [!]t[!]a[!]n[!]p[!]a[!] [!]s[!]a[!]t[!]u[!]p[!]u[!]n[!] [!]k[!]e[!]g[!]a[!]g[!]a[!]l[!]a[!]n[!],[!] [!]m[!]e[!]m[!]b[!]u[!]k[!]t[!]i[!]k[!]a[!]n[!] [!]k[!]e[!]b[!]e[!]n[!]a[!]r[!]a[!]n[!] [!]l[!]o[!]g[!]i[!]k[!]a[!] [!]i[!]n[!]t[!]i[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!].[!][!]
+[!][!]
+[!]5[!].[!] [!]*[!]*[!]T[!]i[!]g[!]a[!] [!]b[!]u[!]g[!] [!]k[!]r[!]i[!]t[!]i[!]s[!] [!]b[!]e[!]r[!]h[!]a[!]s[!]i[!]l[!] [!]t[!]e[!]r[!]i[!]d[!]e[!]n[!]t[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!] [!]d[!]a[!]n[!] [!]d[!]i[!]p[!]e[!]r[!]b[!]a[!]i[!]k[!]i[!]*[!]*[!] [!]s[!]e[!]l[!]a[!]m[!]a[!] [!]p[!]r[!]o[!]s[!]e[!]s[!] [!]p[!]e[!]n[!]g[!]u[!]j[!]i[!]a[!]n[!],[!] [!]y[!]a[!]i[!]t[!]u[!]:[!] [!]Y[!]o[!]u[!]T[!]u[!]b[!]e[!] [!]E[!]r[!]r[!]o[!]r[!] [!]1[!]5[!]3[!],[!] [!]N[!]u[!]l[!]l[!]P[!]o[!]i[!]n[!]t[!]e[!]r[!]E[!]x[!]c[!]e[!]p[!]t[!]i[!]o[!]n[!] [!]p[!]a[!]d[!]a[!] [!]s[!]u[!]b[!]m[!]i[!]t[!] [!]q[!]u[!]i[!]z[!],[!] [!]d[!]a[!]n[!] [!]k[!]e[!]s[!]a[!]l[!]a[!]h[!]a[!]n[!] [!]p[!]e[!]n[!]g[!]e[!]c[!]e[!]k[!]a[!]n[!] [!]s[!]t[!]a[!]t[!]u[!]s[!] [!]p[!]r[!]o[!]g[!]r[!]e[!]s[!]s[!].[!][!]
+[!][!]
+[!]#[!]#[!] [!]6[!].[!]2[!] [!]S[!]a[!]r[!]a[!]n[!] [!]d[!]a[!]n[!] [!]P[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]L[!]a[!]n[!]j[!]u[!]t[!]a[!]n[!][!]
+[!][!]
+[!]U[!]n[!]t[!]u[!]k[!] [!]p[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]l[!]e[!]b[!]i[!]h[!] [!]l[!]a[!]n[!]j[!]u[!]t[!],[!] [!]d[!]i[!]s[!]a[!]r[!]a[!]n[!]k[!]a[!]n[!]:[!][!]
+[!][!]
+[!]|[!] [!]N[!]o[!] [!]|[!] [!]F[!]i[!]t[!]u[!]r[!] [!]|[!] [!]D[!]e[!]s[!]k[!]r[!]i[!]p[!]s[!]i[!] [!]|[!][!]
+[!]|[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]-[!]|[!][!]
+[!]|[!] [!]1[!] [!]|[!] [!]*[!]*[!]P[!]u[!]s[!]h[!] [!]N[!]o[!]t[!]i[!]f[!]i[!]c[!]a[!]t[!]i[!]o[!]n[!]*[!]*[!] [!]|[!] [!]N[!]o[!]t[!]i[!]f[!]i[!]k[!]a[!]s[!]i[!] [!]s[!]a[!]a[!]t[!] [!]a[!]d[!]a[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]b[!]a[!]r[!]u[!] [!]a[!]t[!]a[!]u[!] [!]k[!]u[!]i[!]s[!] [!]t[!]e[!]r[!]s[!]e[!]d[!]i[!]a[!] [!]|[!][!]
+[!]|[!] [!]2[!] [!]|[!] [!]*[!]*[!]F[!]i[!]t[!]u[!]r[!] [!]R[!]e[!]g[!]i[!]s[!]t[!]r[!]a[!]s[!]i[!] [!]M[!]o[!]b[!]i[!]l[!]e[!]*[!]*[!] [!]|[!] [!]F[!]o[!]r[!]m[!] [!]r[!]e[!]g[!]i[!]s[!]t[!]r[!]a[!]s[!]i[!] [!]l[!]a[!]n[!]g[!]s[!]u[!]n[!]g[!] [!]d[!]a[!]r[!]i[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]|[!][!]
+[!]|[!] [!]3[!] [!]|[!] [!]*[!]*[!]U[!]p[!]l[!]o[!]a[!]d[!] [!]F[!]i[!]l[!]e[!] [!]P[!]D[!]F[!]/[!]P[!]P[!]T[!]*[!]*[!] [!]|[!] [!]M[!]a[!]t[!]e[!]r[!]i[!] [!]t[!]i[!]d[!]a[!]k[!] [!]h[!]a[!]n[!]y[!]a[!] [!]v[!]i[!]d[!]e[!]o[!]/[!]t[!]e[!]x[!]t[!],[!] [!]t[!]a[!]p[!]i[!] [!]j[!]u[!]g[!]a[!] [!]f[!]i[!]l[!]e[!] [!]d[!]o[!]k[!]u[!]m[!]e[!]n[!] [!]|[!][!]
+[!]|[!] [!]4[!] [!]|[!] [!]*[!]*[!]S[!]e[!]r[!]t[!]i[!]f[!]i[!]k[!]a[!]t[!] [!]K[!]e[!]l[!]u[!]l[!]u[!]s[!]a[!]n[!]*[!]*[!] [!]|[!] [!]P[!]D[!]F[!] [!]s[!]e[!]r[!]t[!]i[!]f[!]i[!]k[!]a[!]t[!] [!]o[!]t[!]o[!]m[!]a[!]t[!]i[!]s[!] [!]s[!]a[!]a[!]t[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]m[!]e[!]n[!]y[!]e[!]l[!]e[!]s[!]a[!]i[!]k[!]a[!]n[!] [!]s[!]e[!]m[!]u[!]a[!] [!]m[!]a[!]t[!]e[!]r[!]i[!] [!]|[!][!]
+[!]|[!] [!]5[!] [!]|[!] [!]*[!]*[!]L[!]i[!]v[!]e[!] [!]C[!]h[!]a[!]t[!]*[!]*[!] [!]|[!] [!]F[!]i[!]t[!]u[!]r[!] [!]d[!]i[!]s[!]k[!]u[!]s[!]i[!] [!]a[!]n[!]t[!]a[!]r[!]a[!] [!]d[!]o[!]s[!]e[!]n[!] [!]d[!]a[!]n[!] [!]m[!]a[!]h[!]a[!]s[!]i[!]s[!]w[!]a[!] [!]d[!]a[!]l[!]a[!]m[!] [!]k[!]e[!]l[!]a[!]s[!] [!]|[!][!]
+[!]|[!] [!]6[!] [!]|[!] [!]*[!]*[!]C[!]I[!]/[!]C[!]D[!] [!]P[!]i[!]p[!]e[!]l[!]i[!]n[!]e[!]*[!]*[!] [!]|[!] [!]O[!]t[!]o[!]m[!]a[!]s[!]i[!] [!]b[!]u[!]i[!]l[!]d[!] [!]d[!]a[!]n[!] [!]d[!]e[!]p[!]l[!]o[!]y[!]m[!]e[!]n[!]t[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]G[!]i[!]t[!]H[!]u[!]b[!] [!]A[!]c[!]t[!]i[!]o[!]n[!]s[!] [!]|[!][!]
+[!]|[!] [!]7[!] [!]|[!] [!]*[!]*[!]D[!]e[!]p[!]l[!]o[!]y[!]m[!]e[!]n[!]t[!] [!]P[!]u[!]b[!]l[!]i[!]k[!]*[!]*[!] [!]|[!] [!]D[!]e[!]p[!]l[!]o[!]y[!] [!]k[!]e[!] [!]V[!]P[!]S[!] [!]d[!]e[!]n[!]g[!]a[!]n[!] [!]d[!]o[!]m[!]a[!]i[!]n[!] [!]p[!]u[!]b[!]l[!]i[!]k[!] [!]a[!]g[!]a[!]r[!] [!]b[!]i[!]s[!]a[!] [!]d[!]i[!]a[!]k[!]s[!]e[!]s[!] [!]s[!]e[!]c[!]a[!]r[!]a[!] [!]o[!]n[!]l[!]i[!]n[!]e[!] [!]|[!][!]
+[!]|[!] [!]8[!] [!]|[!] [!]*[!]*[!]P[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]i[!]O[!]S[!]*[!]*[!] [!]|[!] [!]P[!]e[!]n[!]g[!]e[!]m[!]b[!]a[!]n[!]g[!]a[!]n[!] [!]a[!]p[!]l[!]i[!]k[!]a[!]s[!]i[!] [!]u[!]n[!]t[!]u[!]k[!] [!]p[!]l[!]a[!]t[!]f[!]o[!]r[!]m[!] [!]i[!]O[!]S[!] [!]m[!]e[!]n[!]g[!]g[!]u[!]n[!]a[!]k[!]a[!]n[!] [!]S[!]w[!]i[!]f[!]t[!] [!]a[!]t[!]a[!]u[!] [!]F[!]l[!]u[!]t[!]t[!]e[!]r[!] [!]|[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]D[!]A[!]F[!]T[!]A[!]R[!] [!]P[!]U[!]S[!]T[!]A[!]K[!]A[!][!]
+[!][!]
+[!]1[!].[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]D[!]o[!]c[!]u[!]m[!]e[!]n[!]t[!]a[!]t[!]i[!]o[!]n[!].[!] [!]([!]2[!]0[!]2[!]4[!])[!].[!] [!]*[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]1[!]1[!] [!]O[!]f[!]f[!]i[!]c[!]i[!]a[!]l[!] [!]D[!]o[!]c[!]u[!]m[!]e[!]n[!]t[!]a[!]t[!]i[!]o[!]n[!]*[!].[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]l[!]a[!]r[!]a[!]v[!]e[!]l[!].[!]c[!]o[!]m[!]/[!]d[!]o[!]c[!]s[!]/[!]1[!]1[!].[!]x[!][!]
+[!][!]
+[!]2[!].[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]S[!]a[!]n[!]c[!]t[!]u[!]m[!].[!] [!]([!]2[!]0[!]2[!]4[!])[!].[!] [!]*[!]A[!]P[!]I[!] [!]T[!]o[!]k[!]e[!]n[!] [!]A[!]u[!]t[!]h[!]e[!]n[!]t[!]i[!]c[!]a[!]t[!]i[!]o[!]n[!]*[!].[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]l[!]a[!]r[!]a[!]v[!]e[!]l[!].[!]c[!]o[!]m[!]/[!]d[!]o[!]c[!]s[!]/[!]1[!]1[!].[!]x[!]/[!]s[!]a[!]n[!]c[!]t[!]u[!]m[!][!]
+[!][!]
+[!]3[!].[!] [!]S[!]q[!]u[!]a[!]r[!]e[!] [!]I[!]n[!]c[!].[!] [!]([!]2[!]0[!]2[!]4[!])[!].[!] [!]*[!]R[!]e[!]t[!]r[!]o[!]f[!]i[!]t[!] [!]2[!] [!]—[!] [!]A[!] [!]t[!]y[!]p[!]e[!]-[!]s[!]a[!]f[!]e[!] [!]H[!]T[!]T[!]P[!] [!]c[!]l[!]i[!]e[!]n[!]t[!] [!]f[!]o[!]r[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]a[!]n[!]d[!] [!]J[!]a[!]v[!]a[!]*[!].[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]s[!]q[!]u[!]a[!]r[!]e[!].[!]g[!]i[!]t[!]h[!]u[!]b[!].[!]i[!]o[!]/[!]r[!]e[!]t[!]r[!]o[!]f[!]i[!]t[!]/[!][!]
+[!][!]
+[!]4[!].[!] [!]G[!]o[!]o[!]g[!]l[!]e[!] [!]I[!]n[!]c[!].[!] [!]([!]2[!]0[!]2[!]4[!])[!].[!] [!]*[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]D[!]e[!]v[!]e[!]l[!]o[!]p[!]e[!]r[!] [!]D[!]o[!]c[!]u[!]m[!]e[!]n[!]t[!]a[!]t[!]i[!]o[!]n[!]*[!].[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]d[!]e[!]v[!]e[!]l[!]o[!]p[!]e[!]r[!].[!]a[!]n[!]d[!]r[!]o[!]i[!]d[!].[!]c[!]o[!]m[!][!]
+[!][!]
+[!]5[!].[!] [!]E[!]l[!]l[!]i[!]s[!],[!] [!]R[!].[!] [!]K[!].[!] [!]([!]2[!]0[!]0[!]9[!])[!].[!] [!]*[!]A[!] [!]F[!]i[!]e[!]l[!]d[!] [!]G[!]u[!]i[!]d[!]e[!] [!]t[!]o[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]M[!]a[!]n[!]a[!]g[!]e[!]m[!]e[!]n[!]t[!] [!]S[!]y[!]s[!]t[!]e[!]m[!]s[!]*[!].[!] [!]A[!]S[!]T[!]D[!] [!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!] [!]C[!]i[!]r[!]c[!]u[!]i[!]t[!]s[!].[!][!]
+[!][!]
+[!]6[!].[!] [!]F[!]o[!]w[!]l[!]e[!]r[!],[!] [!]M[!].[!] [!]([!]2[!]0[!]0[!]2[!])[!].[!] [!]*[!]P[!]a[!]t[!]t[!]e[!]r[!]n[!]s[!] [!]o[!]f[!] [!]E[!]n[!]t[!]e[!]r[!]p[!]r[!]i[!]s[!]e[!] [!]A[!]p[!]p[!]l[!]i[!]c[!]a[!]t[!]i[!]o[!]n[!] [!]A[!]r[!]c[!]h[!]i[!]t[!]e[!]c[!]t[!]u[!]r[!]e[!]*[!].[!] [!]A[!]d[!]d[!]i[!]s[!]o[!]n[!]-[!]W[!]e[!]s[!]l[!]e[!]y[!].[!][!]
+[!][!]
+[!]7[!].[!] [!]B[!]e[!]i[!]z[!]e[!]r[!],[!] [!]B[!].[!] [!]([!]1[!]9[!]9[!]5[!])[!].[!] [!]*[!]B[!]l[!]a[!]c[!]k[!]-[!]B[!]o[!]x[!] [!]T[!]e[!]s[!]t[!]i[!]n[!]g[!]:[!] [!]T[!]e[!]c[!]h[!]n[!]i[!]q[!]u[!]e[!]s[!] [!]f[!]o[!]r[!] [!]F[!]u[!]n[!]c[!]t[!]i[!]o[!]n[!]a[!]l[!] [!]T[!]e[!]s[!]t[!]i[!]n[!]g[!] [!]o[!]f[!] [!]S[!]o[!]f[!]t[!]w[!]a[!]r[!]e[!] [!]a[!]n[!]d[!] [!]S[!]y[!]s[!]t[!]e[!]m[!]s[!]*[!].[!] [!]W[!]i[!]l[!]e[!]y[!].[!][!]
+[!][!]
+[!]8[!].[!] [!]O[!]k[!]H[!]t[!]t[!]p[!].[!] [!]([!]2[!]0[!]2[!]4[!])[!].[!] [!]*[!]O[!]k[!]H[!]t[!]t[!]p[!] [!]—[!] [!]A[!]n[!] [!]H[!]T[!]T[!]P[!] [!]c[!]l[!]i[!]e[!]n[!]t[!] [!]f[!]o[!]r[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]a[!]n[!]d[!] [!]J[!]a[!]v[!]a[!]*[!].[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]s[!]q[!]u[!]a[!]r[!]e[!].[!]g[!]i[!]t[!]h[!]u[!]b[!].[!]i[!]o[!]/[!]o[!]k[!]h[!]t[!]t[!]p[!]/[!][!]
+[!][!]
+[!]9[!].[!] [!]G[!]o[!]o[!]g[!]l[!]e[!] [!]I[!]n[!]c[!].[!] [!]([!]2[!]0[!]2[!]4[!])[!].[!] [!]*[!]M[!]a[!]t[!]e[!]r[!]i[!]a[!]l[!] [!]D[!]e[!]s[!]i[!]g[!]n[!] [!]G[!]u[!]i[!]d[!]e[!]l[!]i[!]n[!]e[!]s[!]*[!].[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]m[!]3[!].[!]m[!]a[!]t[!]e[!]r[!]i[!]a[!]l[!].[!]i[!]o[!]/[!][!]
+[!][!]
+[!]1[!]0[!].[!] [!]M[!]y[!]S[!]Q[!]L[!].[!] [!]([!]2[!]0[!]2[!]4[!])[!].[!] [!]*[!]M[!]y[!]S[!]Q[!]L[!] [!]8[!].[!]0[!] [!]R[!]e[!]f[!]e[!]r[!]e[!]n[!]c[!]e[!] [!]M[!]a[!]n[!]u[!]a[!]l[!]*[!].[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]d[!]e[!]v[!].[!]m[!]y[!]s[!]q[!]l[!].[!]c[!]o[!]m[!]/[!]d[!]o[!]c[!]/[!]r[!]e[!]f[!]m[!]a[!]n[!]/[!]8[!].[!]0[!]/[!]e[!]n[!]/[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]#[!] [!]L[!]A[!]M[!]P[!]I[!]R[!]A[!]N[!][!]
+[!][!]
+[!]#[!]#[!] [!]L[!]a[!]m[!]p[!]i[!]r[!]a[!]n[!] [!]A[!] [!]—[!] [!]S[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!] [!]P[!]r[!]o[!]y[!]e[!]k[!] [!]L[!]a[!]r[!]a[!]v[!]e[!]l[!][!]
+[!][!]
+[!]`[!]`[!]`[!][!]
+[!]L[!]M[!]S[!]-[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!]/[!][!]
+[!]├[!]─[!]─[!] [!]a[!]p[!]p[!]/[!]H[!]t[!]t[!]p[!]/[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]s[!]/[!]A[!]p[!]i[!]/[!] [!] [!] [!] [!]←[!] [!]4[!] [!]A[!]P[!]I[!] [!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]s[!][!]
+[!]├[!]─[!]─[!] [!]a[!]p[!]p[!]/[!]M[!]o[!]d[!]e[!]l[!]s[!]/[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]←[!] [!]7[!] [!]E[!]l[!]o[!]q[!]u[!]e[!]n[!]t[!] [!]M[!]o[!]d[!]e[!]l[!]s[!][!]
+[!]├[!]─[!]─[!] [!]r[!]o[!]u[!]t[!]e[!]s[!]/[!]a[!]p[!]i[!].[!]p[!]h[!]p[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]←[!] [!]1[!]2[!] [!]r[!]o[!]u[!]t[!]e[!] [!]A[!]P[!]I[!][!]
+[!]├[!]─[!]─[!] [!]t[!]e[!]s[!]t[!]s[!]/[!]F[!]e[!]a[!]t[!]u[!]r[!]e[!]/[!]A[!]p[!]i[!]/[!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!] [!]←[!] [!]4[!]2[!] [!]P[!]H[!]P[!]U[!]n[!]i[!]t[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!][!]
+[!]└[!]─[!]─[!] [!]d[!]a[!]t[!]a[!]b[!]a[!]s[!]e[!]/[!]m[!]i[!]g[!]r[!]a[!]t[!]i[!]o[!]n[!]s[!]/[!] [!] [!] [!] [!] [!] [!] [!] [!] [!]←[!] [!]7[!] [!]m[!]i[!]g[!]r[!]a[!]s[!]i[!] [!]t[!]a[!]b[!]e[!]l[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!] [!]L[!]a[!]m[!]p[!]i[!]r[!]a[!]n[!] [!]B[!] [!]—[!] [!]S[!]t[!]r[!]u[!]k[!]t[!]u[!]r[!] [!]P[!]r[!]o[!]y[!]e[!]k[!] [!]A[!]n[!]d[!]r[!]o[!]i[!]d[!][!]
+[!][!]
+[!]`[!]`[!]`[!][!]
+[!]J[!]o[!]u[!]r[!]n[!]e[!]y[!]L[!]e[!]a[!]r[!]n[!]L[!]M[!]S[!]-[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!]/[!][!]
+[!]├[!]─[!]─[!] [!]a[!]p[!]p[!]/[!]s[!]r[!]c[!]/[!]m[!]a[!]i[!]n[!]/[!]j[!]a[!]v[!]a[!]/[!].[!].[!].[!]/[!] [!] [!] [!] [!] [!] [!] [!]←[!] [!]1[!]0[!] [!]J[!]a[!]v[!]a[!] [!]f[!]i[!]l[!]e[!]s[!] [!]([!]5[!] [!]A[!]c[!]t[!]i[!]v[!]i[!]t[!]y[!] [!]+[!] [!]2[!] [!]A[!]d[!]a[!]p[!]t[!]e[!]r[!] [!]+[!] [!]3[!] [!]H[!]e[!]l[!]p[!]e[!]r[!])[!][!]
+[!]├[!]─[!]─[!] [!]a[!]p[!]p[!]/[!]s[!]r[!]c[!]/[!]m[!]a[!]i[!]n[!]/[!]r[!]e[!]s[!]/[!]l[!]a[!]y[!]o[!]u[!]t[!]/[!] [!] [!] [!] [!] [!]←[!] [!]8[!] [!]X[!]M[!]L[!] [!]l[!]a[!]y[!]o[!]u[!]t[!]s[!][!]
+[!]├[!]─[!]─[!] [!]a[!]p[!]p[!]/[!]s[!]r[!]c[!]/[!]t[!]e[!]s[!]t[!]/[!]j[!]a[!]v[!]a[!]/[!].[!].[!].[!]/[!] [!] [!] [!] [!] [!] [!] [!]←[!] [!]3[!]2[!] [!]J[!]U[!]n[!]i[!]t[!] [!]t[!]e[!]s[!]t[!] [!]c[!]a[!]s[!]e[!]s[!][!]
+[!]└[!]─[!]─[!] [!]a[!]p[!]p[!]/[!]b[!]u[!]i[!]l[!]d[!]/[!]o[!]u[!]t[!]p[!]u[!]t[!]s[!]/[!]a[!]p[!]k[!]/[!]d[!]e[!]b[!]u[!]g[!]/[!] [!]←[!] [!]a[!]p[!]p[!]-[!]d[!]e[!]b[!]u[!]g[!].[!]a[!]p[!]k[!] [!]([!]6[!].[!]4[!] [!]M[!]B[!])[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!] [!]L[!]a[!]m[!]p[!]i[!]r[!]a[!]n[!] [!]C[!] [!]—[!] [!]S[!]c[!]r[!]e[!]e[!]n[!]s[!]h[!]o[!]t[!] [!]A[!]n[!]t[!]a[!]r[!]m[!]u[!]k[!]a[!][!]
+[!][!]
+[!]>[!] [!]*[!][[!]L[!]a[!]m[!]p[!]i[!]r[!]k[!]a[!]n[!] [!]s[!]c[!]r[!]e[!]e[!]n[!]s[!]h[!]o[!]t[!] [!]h[!]a[!]l[!]a[!]m[!]a[!]n[!] [!]L[!]o[!]g[!]i[!]n[!],[!] [!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!],[!] [!]B[!]r[!]o[!]w[!]s[!]e[!] [!]K[!]e[!]l[!]a[!]s[!],[!] [!]D[!]e[!]t[!]a[!]i[!]l[!] [!]K[!]e[!]l[!]a[!]s[!],[!] [!]d[!]a[!]n[!] [!]M[!]a[!]t[!]e[!]r[!]i[!]][!]*[!][!]
+[!][!]
+[!]#[!]#[!] [!]L[!]a[!]m[!]p[!]i[!]r[!]a[!]n[!] [!]D[!] [!]—[!] [!]H[!]a[!]s[!]i[!]l[!] [!]T[!]e[!]s[!]t[!] [!]R[!]e[!]p[!]o[!]r[!]t[!][!]
+[!][!]
+[!]*[!]*[!]L[!]a[!]r[!]a[!]v[!]e[!]l[!] [!]([!]P[!]H[!]P[!]U[!]n[!]i[!]t[!])[!]:[!]*[!]*[!][!]
+[!]`[!]`[!]`[!][!]
+[!]P[!]A[!]S[!]S[!] [!] [!]T[!]e[!]s[!]t[!]s[!]\[!]F[!]e[!]a[!]t[!]u[!]r[!]e[!]\[!]A[!]p[!]i[!]\[!]A[!]u[!]t[!]h[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!] [!] [!] [!] [!] [!] [!]([!]1[!]3[!] [!]t[!]e[!]s[!]t[!]s[!])[!][!]
+[!]P[!]A[!]S[!]S[!] [!] [!]T[!]e[!]s[!]t[!]s[!]\[!]F[!]e[!]a[!]t[!]u[!]r[!]e[!]\[!]A[!]p[!]i[!]\[!]K[!]e[!]l[!]a[!]s[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!] [!] [!] [!] [!] [!]([!]1[!]1[!] [!]t[!]e[!]s[!]t[!]s[!])[!][!]
+[!]P[!]A[!]S[!]S[!] [!] [!]T[!]e[!]s[!]t[!]s[!]\[!]F[!]e[!]a[!]t[!]u[!]r[!]e[!]\[!]A[!]p[!]i[!]\[!]M[!]a[!]t[!]e[!]r[!]i[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!] [!] [!] [!] [!]([!]1[!]0[!] [!]t[!]e[!]s[!]t[!]s[!])[!][!]
+[!]P[!]A[!]S[!]S[!] [!] [!]T[!]e[!]s[!]t[!]s[!]\[!]F[!]e[!]a[!]t[!]u[!]r[!]e[!]\[!]A[!]p[!]i[!]\[!]D[!]a[!]s[!]h[!]b[!]o[!]a[!]r[!]d[!]C[!]o[!]n[!]t[!]r[!]o[!]l[!]l[!]e[!]r[!]T[!]e[!]s[!]t[!] [!]([!]8[!] [!]t[!]e[!]s[!]t[!]s[!])[!][!]
+[!][!]
+[!]T[!]e[!]s[!]t[!]s[!]:[!] [!]4[!]2[!] [!]p[!]a[!]s[!]s[!]e[!]d[!][!]
+[!]D[!]u[!]r[!]a[!]t[!]i[!]o[!]n[!]:[!] [!]~[!]5[!]s[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]*[!]*[!]A[!]n[!]d[!]r[!]o[!]i[!]d[!] [!]([!]J[!]U[!]n[!]i[!]t[!])[!]:[!]*[!]*[!][!]
+[!]`[!]`[!]`[!][!]
+[!]B[!]U[!]I[!]L[!]D[!] [!]S[!]U[!]C[!]C[!]E[!]S[!]S[!]F[!]U[!]L[!] [!]i[!]n[!] [!]9[!]m[!] [!]1[!]6[!]s[!][!]
+[!]T[!]e[!]s[!]t[!]s[!] [!]r[!]u[!]n[!]:[!] [!]3[!]2[!],[!] [!]F[!]a[!]i[!]l[!]u[!]r[!]e[!]s[!]:[!] [!]0[!],[!] [!]E[!]r[!]r[!]o[!]r[!]s[!]:[!] [!]0[!],[!] [!]S[!]k[!]i[!]p[!]p[!]e[!]d[!]:[!] [!]0[!][!]
+[!]`[!]`[!]`[!][!]
+[!][!]
+[!]#[!]#[!] [!]L[!]a[!]m[!]p[!]i[!]r[!]a[!]n[!] [!]E[!] [!]—[!] [!]L[!]i[!]n[!]k[!] [!]R[!]e[!]p[!]o[!]s[!]i[!]t[!]o[!]r[!]y[!][!]
+[!][!]
+[!]-[!] [!]*[!]*[!]G[!]i[!]t[!]H[!]u[!]b[!]:[!]*[!]*[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]g[!]i[!]t[!]h[!]u[!]b[!].[!]c[!]o[!]m[!]/[!]R[!]i[!]z[!]k[!]y[!]H[!]e[!]r[!]d[!]i[!]a[!]n[!]s[!]y[!]a[!]h[!]1[!]/[!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!]-[!]m[!]a[!]n[!]a[!]g[!]e[!]m[!]e[!]n[!]t[!]-[!]s[!]y[!]s[!]t[!]e[!]m[!][!]
+[!]-[!] [!]*[!]*[!]A[!]P[!]K[!] [!]D[!]o[!]w[!]n[!]l[!]o[!]a[!]d[!]:[!]*[!]*[!] [!]h[!]t[!]t[!]p[!]s[!]:[!]/[!]/[!]g[!]i[!]t[!]h[!]u[!]b[!].[!]c[!]o[!]m[!]/[!]R[!]i[!]z[!]k[!]y[!]H[!]e[!]r[!]d[!]i[!]a[!]n[!]s[!]y[!]a[!]h[!]1[!]/[!]L[!]e[!]a[!]r[!]n[!]i[!]n[!]g[!]-[!]m[!]a[!]n[!]a[!]g[!]e[!]m[!]e[!]n[!]t[!]-[!]s[!]y[!]s[!]t[!]e[!]m[!]/[!]r[!]a[!]w[!]/[!]m[!]a[!]s[!]t[!]e[!]r[!]/[!]a[!]p[!]k[!]/[!]J[!]o[!]u[!]r[!]n[!]e[!]y[!]L[!]e[!]a[!]r[!]n[!]L[!]M[!]S[!].[!]a[!]p[!]k[!][!]
+[!][!]
+[!]-[!]-[!]-[!][!]
+[!][!]
+[!]*[!]L[!]a[!]p[!]o[!]r[!]a[!]n[!] [!]i[!]n[!]i[!] [!]d[!]i[!]s[!]u[!]s[!]u[!]n[!] [!]s[!]e[!]b[!]a[!]g[!]a[!]i[!] [!]b[!]a[!]g[!]i[!]a[!]n[!] [!]d[!]a[!]r[!]i[!] [!]P[!]r[!]o[!]y[!]e[!]k[!] [!]A[!]k[!]h[!]i[!]r[!] [!]m[!]a[!]t[!]a[!] [!]k[!]u[!]l[!]i[!]a[!]h[!] [!][[!]N[!]a[!]m[!]a[!] [!]M[!]a[!]t[!]a[!] [!]K[!]u[!]l[!]i[!]a[!]h[!]][!]*[!] [!] [!][!]
+[!]*[!]P[!]r[!]o[!]g[!]r[!]a[!]m[!] [!]S[!]t[!]u[!]d[!]i[!] [!]R[!]e[!]k[!]a[!]y[!]a[!]s[!]a[!] [!]K[!]e[!]a[!]m[!]a[!]n[!]a[!]n[!] [!]S[!]i[!]b[!]e[!]r[!] [!]—[!] [!]P[!]o[!]l[!]i[!]t[!]e[!]k[!]n[!]i[!]k[!] [!]S[!]i[!]b[!]e[!]r[!] [!]d[!]a[!]n[!] [!]S[!]a[!]n[!]d[!]i[!] [!]N[!]e[!]g[!]a[!]r[!]a[!] [!]—[!] [!]2[!]0[!]2[!]6[!]*[!][!]
+[!]
