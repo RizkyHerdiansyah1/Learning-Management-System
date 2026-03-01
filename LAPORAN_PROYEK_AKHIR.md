@@ -135,6 +135,41 @@ Planning → Analysis → Design → Development → Testing → Deployment → 
 | Deployment | 1 minggu | XAMPP local + build APK | Web live + APK |
 | Maintenance | Ongoing | Bug fixes | Updated codebase |
 
+### Tabel Jadwal Proyek
+
+| No | Kegiatan | Minggu 1 | Minggu 2 | Minggu 3 | Minggu 4 | Minggu 5 | Minggu 6 | Minggu 7 | Minggu 8 | Minggu 9 | Minggu 10 | Minggu 11 | Minggu 12 | PIC |
+|----|----------|:--------:|:--------:|:--------:|:--------:|:--------:|:--------:|:--------:|:--------:|:--------:|:---------:|:---------:|:---------:|-----|
+| **1** | **PLANNING** | | | | | | | | | | | | | |
+| 1.1 | Analisis kebutuhan & user story | X | X | | | | | | | | | | | Pengembang |
+| 1.2 | Penetapan scope & batasan proyek | X | X | | | | | | | | | | | Pengembang |
+| 1.3 | Penyusunan timeline proyek | | X | | | | | | | | | | | Pengembang |
+| **2** | **ANALYSIS** | | | | | | | | | | | | | |
+| 2.1 | Identifikasi risiko & keamanan | | | X | X | | | | | | | | | Pengembang |
+| 2.2 | Audit desain sistem awal | | | X | X | | | | | | | | | Pengembang |
+| **3** | **DESIGN** | | | | | | | | | | | | | |
+| 3.1 | Perancangan ERD (7 tabel) | | | | X | X | | | | | | | | Pengembang |
+| 3.2 | Desain arsitektur MVC & API | | | | X | X | | | | | | | | Pengembang |
+| 3.3 | Pembuatan wireframe UI web & Android | | | | | X | | | | | | | | Pengembang |
+| **4** | **DEVELOPMENT** | | | | | | | | | | | | | |
+| 4.1 | Setup Laravel 11 & konfigurasi database | | | | | X | X | | | | | | | Pengembang |
+| 4.2 | Pembuatan 7 Eloquent Model & migrasi | | | | | X | X | | | | | | | Pengembang |
+| 4.3 | Implementasi Web Controller & Blade Views | | | | | | X | X | | | | | | Pengembang |
+| 4.4 | Implementasi REST API (12 endpoint) | | | | | | | X | X | | | | | Pengembang |
+| 4.5 | Pengembangan Aplikasi Android (Java) | | | | | | | | X | X | | | | Pengembang |
+| 4.6 | Integrasi Android & API (Retrofit) | | | | | | | | | X | | | | Pengembang |
+| **5** | **TESTING** | | | | | | | | | | | | | |
+| 5.1 | Whitebox testing Laravel (42 TC) | | | | | | | | | | X | | | Pengembang |
+| 5.2 | Whitebox testing Android (32 TC) | | | | | | | | | | X | X | | Pengembang |
+| 5.3 | Perbaikan bug & validasi ulang | | | | | | | | | | | X | | Pengembang |
+| **6** | **DEPLOYMENT** | | | | | | | | | | | | | |
+| 6.1 | Build APK & deploy web di localhost | | | | | | | | | | | X | X | Pengembang |
+| 6.2 | Dokumentasi teknis & laporan proyek | | | | | | | | | | | | X | Pengembang |
+| 6.3 | Upload ke GitHub & rilis APK | | | | | | | | | | | | X | Pengembang |
+
+**Keterangan:** X = Kegiatan berlangsung pada minggu tersebut  
+**Durasi Total:** 12 Minggu (3 Bulan)  
+**Tahun Akademik:** 2025/2026
+
 ## 3.2 Arsitektur Sistem
 
 Sistem menggunakan arsitektur **Client-Server 3-Layer**:
